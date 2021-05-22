@@ -1,3 +1,5 @@
+import { db } from '../services/firebase';
+
 const trackReducer = (track) => {
   return {
     id: track.id,
@@ -61,6 +63,74 @@ export const resolvers = {
         : [];
 
       return items;
+    },
+  },
+
+  Mutation: {
+    createSession: async (
+      _,
+      { sessionName }: { sessionName: string },
+      context
+    ) => {
+      try {
+        const sessionRef = await db.collection('sessions').add({
+          name: sessionName,
+          users: [{ id: context.authSession.id }],
+        });
+        const sessionDoc = await sessionRef.get();
+        const userRef = db.collection('users').doc(context.authSession.id);
+
+        db.runTransaction(async (transaction) => {
+          let userDoc;
+          try {
+            userDoc = await transaction.get(userRef);
+            const sessions = userDoc.data()?.sessions ?? [];
+
+            transaction.update(userRef, {
+              sessions: [
+                { id: sessionRef.id, ...sessionDoc.data() },
+                ...sessions,
+              ],
+            });
+          } catch (err) {
+            throw new Error(err);
+          }
+        });
+
+        return;
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    addToSession: async (_, { sessionId, track }) => {
+      try {
+        await db
+          .collection('sessions')
+          .doc(sessionId)
+          .collection('queue')
+          .doc(track.id)
+          .set({ ...track });
+
+        return { code: 201, success: true, track };
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    removeFromSession: async (_, { sessionId, track }) => {
+      try {
+        await db
+          .collection('sessions')
+          .doc(sessionId)
+          .collection('queue')
+          .doc(track.id)
+          .delete();
+
+        return { code: 204, success: true, track };
+      } catch (err) {
+        throw new Error(err);
+      }
     },
   },
 };
