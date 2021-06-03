@@ -1,6 +1,4 @@
 import { GetServerSideProps } from 'next';
-import { gql, useQuery, NetworkStatus } from '@apollo/client';
-import Router from 'next/router';
 import styled from 'styled-components';
 import { getAuthSession } from '../lib/session';
 import { useCreateSession } from '../graphql/mutations';
@@ -8,19 +6,7 @@ import Layout from '../components/Layout';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import SessionForm from '../components/SessionForm';
-
-const GET_USER_TOP_TRACKS = gql`
-  query UserTopTracks($offset: Int, $limit: Int) {
-    userTopTracks(offset: $offset, limit: $limit) {
-      id
-      name
-      artists {
-        id
-        name
-      }
-    }
-  }
-`;
+import Sessions from '../components/Sessions';
 
 const Main = styled.div`
   position: relative;
@@ -36,64 +22,51 @@ const Main = styled.div`
 const ActionBar = styled.div`
   position: absolute;
   top: 10vh;
+  left: 0;
   right: 2.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1rem 1rem 0;
+
+  > h2 {
+    margin: 0 0 0 4rem;
+  }
+`;
+
+const ActionButton = styled(Button)`
+  > span {
+    margin-right: 8px;
+    white-space: nowrap;
+    color: ${({ theme }) => theme.colors.darkGreen};
+  }
+
+  > img {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const Index = () => {
   const [createSession] = useCreateSession();
-  const { loading, data, error, fetchMore, networkStatus } = useQuery(
-    GET_USER_TOP_TRACKS,
-    {
-      variables: { offset: 0, limit: 15 },
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-
-  if (loading) return null;
-
-  if (error?.graphQLErrors && error.graphQLErrors.length > 0) {
-    error.graphQLErrors.map((err) => {
-      if (err.extensions?.code === 'UNAUTHENTICATED') {
-        Router.push('/login');
-      }
-    });
-  }
-
-  const loadingMore = networkStatus === NetworkStatus.fetchMore;
 
   return (
     <Layout>
       <Main>
         <ActionBar>
+          <h2>My Sessions</h2>
           <Modal
             activator={({ setOpen }) => (
-              <Button onClick={() => setOpen(true)}>Open Modal</Button>
+              <ActionButton onClick={() => setOpen(true)}>
+                <span>New</span>
+                <img src="/plus.svg" alt="Plus Icon" />
+              </ActionButton>
             )}
           >
             <SessionForm onSubmit={createSession} />
           </Modal>
         </ActionBar>
-        <div>
-          <ol>
-            {data.userTopTracks &&
-              data.userTopTracks.map((track) => <li>{track.name}</li>)}
-          </ol>
-          <Button
-            onClick={() => {
-              fetchMore({
-                variables: {
-                  offset: data.userTopTracks.length,
-                },
-              });
-            }}
-          >
-            Load More
-          </Button>
-        </div>
+        <Sessions />
       </Main>
     </Layout>
   );

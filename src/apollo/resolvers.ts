@@ -64,6 +64,15 @@ export const resolvers = {
 
       return items;
     },
+
+    sessions: async (_, __, context) => {
+      const userDoc = await db
+        .collection('users')
+        .doc(context.authSession.id)
+        .get();
+
+      return userDoc.data()?.sessions;
+    },
   },
 
   Mutation: {

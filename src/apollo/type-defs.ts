@@ -73,14 +73,6 @@ export const typeDefs = gql`
   type Query {
     userTopTracks(offset: Int, limit: Int): [Track]
     userTopArtists(offset: Int, limit: Int): [Artist]
-  }
-
-  type Mutation {
-    createSession(sessionName: String!): Session
-    addToSession(sessionId: String!, track: TrackInput!): UpdateSessionResponse
-    removeFromSession(
-      sessionId: String!
-      track: TrackInput!
-    ): UpdateSessionResponse
+    sessions: [Session]
   }
 `;
