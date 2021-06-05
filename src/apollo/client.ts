@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import {
   ApolloClient,
+  ApolloLink,
   from,
   InMemoryCache,
   NormalizedCacheObject,
@@ -62,9 +63,23 @@ function createApolloClient() {
     if (networkError) console.log(`[Network error]: ${networkError}`);
   });
 
+  const omitTypenameLink = new ApolloLink((operation, forward) => {
+    const omitTypename = (key: string, value: any) =>
+      key === '__typename' ? undefined : value;
+
+    if (operation.variables) {
+      operation.variables = JSON.parse(
+        JSON.stringify(operation.variables),
+        omitTypename
+      );
+    }
+
+    return forward(operation);
+  });
+
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: from([errorLink, createIsomorphLink()]),
+    link: from([errorLink, omitTypenameLink, createIsomorphLink()]),
     cache,
   });
 }
