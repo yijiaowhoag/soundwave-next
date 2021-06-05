@@ -1,4 +1,3 @@
-import Router from 'next/router';
 import styled from 'styled-components';
 import { useGetSessions } from '../graphql/queries';
 import Session, { SessionCard } from './Session';
@@ -21,18 +20,10 @@ const Sessions = styled.div`
 `;
 
 const AllSessions: React.FC = () => {
-  const { data, loading, error } = useGetSessions();
+  const { data, loading } = useGetSessions();
 
   if (loading) {
     return <p>Loading...</p>;
-  }
-
-  if (error?.graphQLErrors && error.graphQLErrors.length > 0) {
-    error.graphQLErrors.map((err) => {
-      if (err.extensions?.code === 'UNAUTHENTICATED') {
-        Router.push('/login');
-      }
-    });
   }
 
   if (!data?.sessions) return null;

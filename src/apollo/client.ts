@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import {
   ApolloClient,
+  from,
   InMemoryCache,
   NormalizedCacheObject,
 } from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
+import Router from 'next/router';
 
 type TApolloClient = ApolloClient<NormalizedCacheObject>;
 
@@ -43,9 +46,25 @@ const cache = new InMemoryCache({
 });
 
 function createApolloClient() {
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+      graphQLErrors.map(({ message, locations, path, ...error }) => {
+        console.log(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        );
+
+        if (error.extensions?.code === 'UNAUTHENTICATED') {
+          Router.replace('/login');
+        }
+      });
+    }
+
+    if (networkError) console.log(`[Network error]: ${networkError}`);
+  });
+
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: createIsomorphLink(),
+    link: from([errorLink, createIsomorphLink()]),
     cache,
   });
 }
