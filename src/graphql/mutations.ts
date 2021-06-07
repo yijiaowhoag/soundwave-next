@@ -43,7 +43,36 @@ export const useCreateSession = (variables?: any) =>
   useMutation(CREATE_SESSION, { variables });
 
 export const useAddTrack = (variables?: any) =>
-  useMutation(ADD_TRACK, { variables });
+  useMutation(ADD_TRACK, {
+    variables,
+    update(cache, { data: { addToSession } }) {
+      console.log('update(Add)', addToSession);
+
+      // cache.writeFragment({
+      //   id:
+      //   data:
+      // })
+
+      cache.modify({
+        fields: {
+          queue(existingSession) {
+            console.log('existingSession(Add)', addToSession);
+          },
+        },
+      });
+    },
+  });
 
 export const useRemoveTrack = (variables?: any) =>
-  useMutation(REMOVE_TRACK, { variables });
+  useMutation(REMOVE_TRACK, {
+    variables,
+    update(cache, { data: { removeFromSession } }) {
+      console.log('update(Remove)', removeFromSession);
+
+      cache.modify({
+        fields: {
+          queue(existingSession) {},
+        },
+      });
+    },
+  });
