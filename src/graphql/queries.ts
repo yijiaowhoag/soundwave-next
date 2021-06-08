@@ -46,6 +46,30 @@ const GET_SESSIONS = gql`
   }
 `;
 
+const GET_SESSION = gql`
+  query GetSession($sessionId: ID!) {
+    session(sessionId: $sessionId) {
+      queue {
+        id
+        name
+        artists {
+          id
+          name
+          genres
+        }
+        images {
+          url
+          width
+          height
+        }
+        duration_ms
+        uri
+        timestamp
+      }
+    }
+  }
+`;
+
 export const useTopTracks = (variables?: any) =>
   useQuery(GET_USER_TOP_TRACKS, { variables });
 

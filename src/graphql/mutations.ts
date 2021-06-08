@@ -20,6 +20,7 @@ const ADD_TRACK = gql`
       track {
         id
         name
+        timestamp
       }
     }
   }
@@ -34,6 +35,7 @@ const REMOVE_TRACK = gql`
       track {
         id
         name
+        timestamp
       }
     }
   }

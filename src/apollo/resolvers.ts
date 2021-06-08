@@ -73,6 +73,28 @@ export const resolvers = {
 
       return userDoc.data()?.sessions;
     },
+
+    session: async (_, { sessionId }) => {
+      const sessionDoc = await db.collection('sessions').doc(sessionId).get();
+      const queue = await db
+        .collection('sessions')
+        .doc(sessionId)
+        .collection('queue')
+        .orderBy('timestamp', 'desc')
+        .get();
+
+      return {
+        id: sessionDoc.id,
+        ...sessionDoc.data(),
+        queue: queue
+          ? queue.docs.map((doc) => ({
+              ...doc.data(),
+              id: doc.id,
+              timestamp: doc.data().timestamp.toString(),
+            }))
+          : [],
+      };
+    },
   },
 
   Mutation: {
@@ -114,14 +136,24 @@ export const resolvers = {
 
     addToSession: async (_, { sessionId, track }) => {
       try {
+        const timestamp = Date.now();
+
         await db
           .collection('sessions')
           .doc(sessionId)
           .collection('queue')
-          .doc(track.id)
-          .set({ ...track });
+          .doc(`${timestamp}:${track.id}`)
+          .set({ ...track, timestamp });
 
-        return { code: 201, success: true, track };
+        return {
+          code: 201,
+          success: true,
+          track: {
+            ...track,
+            id: `${timestamp}:${track.id}`,
+            timestamp,
+          },
+        };
       } catch (err) {
         throw new Error(err);
       }

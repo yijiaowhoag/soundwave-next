@@ -10,7 +10,7 @@ export const typeDefs = gql`
     id: ID
     name: String!
     users: [User]
-    queue: [Track]
+    queue: [TrackUpdated]
   }
 
   type Track {
@@ -20,6 +20,16 @@ export const typeDefs = gql`
     images: [Image]
     duration_ms: Int
     uri: String
+  }
+
+  type TrackUpdated {
+    id: ID!
+    name: String!
+    artists: [Artist]
+    images: [Image]
+    duration_ms: Int
+    uri: String
+    timestamp: String
   }
 
   type Artist {
