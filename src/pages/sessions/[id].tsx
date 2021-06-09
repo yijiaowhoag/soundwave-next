@@ -1,9 +1,7 @@
 import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import Button from '../../components/Button';
-import Playlist, { HorizontalPlaylist } from '../../components/Playlist';
-import Player from '../..//components/Player';
-import { useTopTracks, useGetSession } from '../../graphql/queries';
+import Sidebar from '../../components/Sidebar';
 import { useAddTrack, useRemoveTrack } from '../../graphql/mutations';
 
 const Container = styled.div`
@@ -59,7 +57,7 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
             }
           />
         </div>
-        <div>
+        <Sidebar width={450}>
           <h1>Spotify Top Tracks</h1>
           {topTracksData?.userTopTracks && (
             <Playlist
@@ -80,7 +78,7 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
           >
             Load More
           </Button>
-        </div>
+        </Sidebar>
       </Container>
     </>
   );
