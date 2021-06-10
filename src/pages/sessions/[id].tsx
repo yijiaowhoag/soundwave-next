@@ -1,7 +1,9 @@
 import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import Button from '../../components/Button';
+import Player from '../../components/Player';
 import Sidebar from '../../components/Sidebar';
+import { getAuthSession } from '../../lib/session';
 import { useAddTrack, useRemoveTrack } from '../../graphql/mutations';
 
 const Container = styled.div`
@@ -10,14 +12,15 @@ const Container = styled.div`
   justify-content: space-between;
   width: 100%;
 
-  div:first-child {
+  > div:first-child {
     width: ${({ theme }) => theme.columns(5)};
   }
 `;
 
-const Participants = styled.div``;
-
-const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
+const Session: React.FC<{ sessionId: string; token: string }> = ({
+  sessionId,
+  token,
+}) => {
   const { data: sessionData } = useGetSession({ sessionId });
   const [addToSession] = useAddTrack();
   const [removeFromSession] = useRemoveTrack();
@@ -36,20 +39,7 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
   return (
     <>
       <Container>
-        {/* <Player
-          queue={sessionData?.session.playlist || []}
-          token={props.access_token}
-        />
-        <Player queue={data?.topTracksData?.items || []} />
-        <Participants>
-          {sessionData?.participants?.map(({ username }) => (
-            <span>{username}</span>
-          ))}
-        </Participants>
-        <HorizontalPlaylist tracks={sessionData?.session.playlist || []} /> */}
-
-        <div>
-          <h1>Playlist: {sessionData?.name}</h1>
+        <Player queue={sessionData?.session.queue || []} token={token} />
           <Playlist
             tracks={sessionData?.session.queue || []}
             onRemove={(track) =>
@@ -85,8 +75,10 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const authSession = await getAuthSession(context.req);
+
   return {
-    props: { sessionId: context.params?.id },
+    props: { sessionId: context.params?.id, token: authSession?.accessToken },
   };
 };
 
