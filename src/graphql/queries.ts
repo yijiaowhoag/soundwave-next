@@ -66,6 +66,16 @@ const GET_SESSION = gql`
         uri
         timestamp
       }
+      audioFeatures {
+        acousticness
+        danceability
+        energy
+        instrumentalness
+        liveness
+        loudness
+        tempo
+        valence
+      }
     }
   }
 `;

@@ -10,7 +10,8 @@ export const typeDefs = gql`
     id: ID
     name: String!
     users: [User]
-    queue: [TrackUpdated]
+    trackIds: [String]
+    audioFeatures: [AudioFeatures]
   }
 
   type Track {
@@ -44,6 +45,19 @@ export const typeDefs = gql`
     url: String!
     width: Int
     height: Int
+  }
+
+  type AudioFeatures {
+    acousticness: Float
+    danceability: Float
+    energy: Float
+    instrumentalness: Float
+    liveness: Float
+    loudness: Float
+    mode: Int
+    speechiness: Float
+    tempo: Float
+    valence: Float
   }
 
   input TrackInput {

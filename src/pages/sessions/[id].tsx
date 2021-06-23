@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import Button from '../../components/Button';
 import Player from '../../components/Player';
-import Sidebar from '../../components/Sidebar';
+import AudioFeatures from '../../components/AudioFeatures';
 import { getAuthSession } from '../../lib/session';
 import { useAddTrack, useRemoveTrack } from '../../graphql/mutations';
 
@@ -37,8 +37,11 @@ const Session: React.FC<{ sessionId: string; token: string }> = ({
   });
 
   return (
-    <>
-      <Container>
+      {sessionData?.audioFeatures ? (
+        <AudioFeatures audioFeatures={sessionData.audioFeatures} />
+      ) : (
+        <p>Session does not have enough data to support audio features</p>
+      )}
         <Player queue={sessionData?.session.queue || []} token={token} />
           <Playlist
             tracks={sessionData?.session.queue || []}

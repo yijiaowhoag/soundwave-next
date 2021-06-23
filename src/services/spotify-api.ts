@@ -38,10 +38,17 @@ export class SpotifyAPI extends RESTDataSource {
     );
   }
 
-  async getUserTopArtists(
-    offset = 0 as number,
-    limit = 20 as number
-  ): Promise<Paging<any>> {
-    return this.get(`${this.baseURL}/me/top/artists`);
+  async getAudioFeatures(trackIds: string[]): Promise<any> {
+    /**
+     * Audio feature objects are returned in the order requested.
+     * If an object is not found, a null value is returned in the appropriate position.
+     * Duplicate ids in the query will result in duplicate objects in the response.
+     */
+
+    return this.get(
+      `${this.baseURL}/audio-features?ids=${encodeURIComponent(
+        trackIds.join(',')
+      )}`
+    );
   }
 }

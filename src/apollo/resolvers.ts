@@ -74,8 +74,9 @@ export const resolvers = {
       return userDoc.data()?.sessions;
     },
 
-    session: async (_, { sessionId }) => {
+    session: async (_, { sessionId }: { sessionId: string }) => {
       const sessionDoc = await db.collection('sessions').doc(sessionId).get();
+
       const queue = await db
         .collection('sessions')
         .doc(sessionId)
@@ -83,17 +84,21 @@ export const resolvers = {
         .orderBy('timestamp', 'desc')
         .get();
 
+      const trackIds: string[] = [];
+
+      const list = queue
+        ? queue.docs.map((doc) => {
+            trackIds.push(doc.data().id);
+
       return {
-        id: sessionDoc.id,
-        ...sessionDoc.data(),
-        queue: queue
-          ? queue.docs.map((doc) => ({
               ...doc.data(),
               id: doc.id,
               timestamp: doc.data().timestamp.toString(),
-            }))
-          : [],
       };
+          })
+        : [];
+
+      return { id: sessionDoc.id, ...sessionDoc.data(), queue: list, trackIds };
     },
   },
 
@@ -172,6 +177,19 @@ export const resolvers = {
       } catch (err) {
         throw new Error(err);
       }
+    },
+  },
+
+  Session: {
+    id: (parent) => parent.id,
+    name: (parent) => parent.name,
+    queue: async (parent) => parent.queue,
+    audioFeatures: async (parent, __, { dataSources }) => {
+      const { audio_features } = await dataSources.spotifyAPI.getAudioFeatures(
+        parent.trackIds
+      );
+
+      return audio_features;
     },
   },
 };
