@@ -15,7 +15,17 @@ export const Field = styled.input`
   &::placeholder {
     color: white;
   }
+
+  &:focus {
+    outline: none;
+  }
 `;
+
+interface FieldProps {
+  initialValue: string | number | string[] | undefined;
+  placeholder?: string;
+  onChange?: React.ChangeEventHandler;
+}
 
 export const useInput = (initialValue: any) => {
   const [value, setValue] = useState(initialValue);
@@ -28,10 +38,6 @@ export const useInput = (initialValue: any) => {
 
   return [value, handleChange, reset];
 };
-
-interface FieldProps {
-  initialValue: string | number | string[] | undefined;
-}
 
 const Input: React.FC<FieldProps> = (props) => {
   const [value, handleChange] = useInput(props.initialValue);

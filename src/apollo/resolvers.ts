@@ -33,6 +33,14 @@ const artistReducer = (artist) => {
 
 export const resolvers = {
   Query: {
+    search: async (_, { query }: { query: string }, { dataSources }) => {
+      const response = await dataSources.spotifyAPI.searchTracks(query);
+
+      return Array.isArray(response.tracks.items)
+        ? response.tracks.items.map(trackReducer)
+        : [];
+    },
+
     userTopTracks: async (
       _,
       { offset, limit }: { offset: number; limit: number },

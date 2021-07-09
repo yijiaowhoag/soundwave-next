@@ -1,5 +1,6 @@
 import { AuthenticationError } from 'apollo-server-micro';
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest';
+import querystring from 'querystring';
 
 interface Paging<T> {
   items: T[];
@@ -50,5 +51,15 @@ export class SpotifyAPI extends RESTDataSource {
         trackIds.join(',')
       )}`
     );
+  }
+
+  async searchTracks(query: string): Promise<any> {
+    // const searchParams = new URLSearchParams();
+    // searchParams.append('q', query);
+    // searchParams.append('type', 'track');
+
+    const qs = querystring.stringify({ q: query, type: 'track' });
+
+    return this.get(`${this.baseURL}/search?${qs}`);
   }
 }

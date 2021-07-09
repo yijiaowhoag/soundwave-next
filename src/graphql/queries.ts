@@ -1,4 +1,22 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useLazyQuery, QueryHookOptions } from '@apollo/client';
+
+const SEARCH = gql`
+  query Search($query: String) {
+    search(query: $query) {
+      name
+      artists {
+        name
+      }
+      images {
+        url
+        width
+        height
+      }
+      duration_ms
+      uri
+    }
+  }
+`;
 
 const GET_USER_TOP_TRACKS = gql`
   query GetUserTopTracks($offset: Int, $limit: Int) {
@@ -79,6 +97,9 @@ const GET_SESSION = gql`
     }
   }
 `;
+
+export const useSearch = (options?: QueryHookOptions) =>
+  useLazyQuery(SEARCH, options);
 
 export const useTopTracks = (variables?: any) =>
   useQuery(GET_USER_TOP_TRACKS, { variables });

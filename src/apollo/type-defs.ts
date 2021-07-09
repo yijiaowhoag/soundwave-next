@@ -95,6 +95,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    search(query: String): [Track]
     userTopTracks(offset: Int, limit: Int): [Track]
     userTopArtists(offset: Int, limit: Int): [Artist]
     sessions: [Session]
