@@ -16,6 +16,7 @@
     "apollo-datasource-rest": "^0.13.0",
     "apollo-server-micro": "^2.24.1",
     "cookie": "^0.4.1",
+    "debounce-promise": "^3.1.2",
     "firebase-admin": "^9.8.0",
     "graphql": "^15.5.0",
     "isomorphic-unfetch": "^3.1.0",
