@@ -81,6 +81,12 @@ const Dropdown: React.FC = () => {
     </components.DropdownIndicator>
   );
 
+  const MultiValue = (props) => (
+    <components.MultiValue {...props}>
+      <span>{props.data.label}</span> - <span>{props.data.artist}</span>
+    </components.MultiValue>
+  );
+
   return (
     <>
       <AsyncSelect
@@ -92,7 +98,7 @@ const Dropdown: React.FC = () => {
         placeholder="Search by Track"
         classNamePrefix="select"
         styles={customStyles}
-        components={{ DropdownIndicator }}
+        components={{ DropdownIndicator, MultiValue }}
       />
       <div>{JSON.stringify(seeds)}</div>
     </>
