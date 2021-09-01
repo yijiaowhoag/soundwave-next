@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useGetSessions } from '../graphql/queries';
+import { useSessionsQuery } from '../generated/graphql';
 import Session, { SessionCard } from './Session';
 
 const SessionsDiv = styled.div`
@@ -14,13 +14,13 @@ const Sessions = styled.div`
   display: flex;
   width: fit-content;
 
-  > ${SessionCard}:first-child {
+  ${SessionCard}:first-child {
     margin-left: 4rem;
   }
 `;
 
 const AllSessions: React.FC = () => {
-  const { data, loading } = useGetSessions();
+  const { data, loading } = useSessionsQuery();
 
   if (loading) {
     return <p>Loading...</p>;

@@ -1,0 +1,16 @@
+query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
+  recommendations(seeds: $seeds, filters: $filters) {
+    id
+    name
+    artists {
+      name
+    }
+    images {
+      url
+      width
+      height
+    }
+    duration_ms
+    uri
+  }
+}

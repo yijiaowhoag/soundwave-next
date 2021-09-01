@@ -1,0 +1,20 @@
+mutation AddTrack($sessionId: String!, $track: AddTrackInput!) {
+  addToSession(sessionId: $sessionId, track: $track) {
+    track {
+      id
+      name
+      artists {
+        id
+        name
+      }
+      images {
+        url
+        width
+        height
+      }
+      duration_ms
+      uri
+      timestamp
+    }
+  }
+}

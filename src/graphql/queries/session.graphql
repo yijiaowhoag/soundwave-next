@@ -1,0 +1,22 @@
+query Session($sessionId: String!) {
+  session(sessionId: $sessionId) {
+    id
+    name
+    queue {
+      id
+      name
+      artists {
+        id
+        name
+      }
+      images {
+        url
+        width
+        height
+      }
+      duration_ms
+      uri
+      timestamp
+    }
+  }
+}

@@ -33,33 +33,26 @@ export class SpotifyAPI extends RESTDataSource {
   }
 
   async getUserTopArtists(offset: number, limit: number): Promise<Paging<any>> {
-    console.log('OFFSET', offset, 'LIMIT', limit);
     return this.get(
       `${this.baseURL}/me/top/artists?limit=${limit}&offset=${offset}`
     );
   }
 
-  async getAudioFeatures(trackIds: string[]): Promise<any> {
-    /**
-     * Audio feature objects are returned in the order requested.
-     * If an object is not found, a null value is returned in the appropriate position.
-     * Duplicate ids in the query will result in duplicate objects in the response.
-     */
-
-    return this.get(
-      `${this.baseURL}/audio-features?ids=${encodeURIComponent(
-        trackIds.join(',')
-      )}`
-    );
-  }
-
-  async searchTracks(query: string): Promise<any> {
-    // const searchParams = new URLSearchParams();
-    // searchParams.append('q', query);
-    // searchParams.append('type', 'track');
-
-    const qs = querystring.stringify({ q: query, type: 'track' });
+  async search(query: string, type?: string): Promise<any> {
+    const qs = querystring.stringify({ query, type: type || 'track' });
 
     return this.get(`${this.baseURL}/search?${qs}`);
+  }
+
+  async getRecommendations(
+    seeds: string[],
+    filters?: { [key: string]: number }
+  ): Promise<any> {
+    const str = new URLSearchParams({
+      seed_tracks: seeds.join(','),
+      ...filters,
+    }).toString();
+
+    return this.get(`${this.baseURL}/recommendations?${str}`);
   }
 }

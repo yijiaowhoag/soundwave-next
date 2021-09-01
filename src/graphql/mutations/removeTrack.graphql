@@ -1,0 +1,7 @@
+mutation RemoveTrack($sessionId: String!, $track: RemoveTrackInput!) {
+  removeFromSession(sessionId: $sessionId, track: $track) {
+    track {
+      id
+    }
+  }
+}

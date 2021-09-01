@@ -1,15 +1,22 @@
 import { gql } from 'apollo-server-micro';
 
 export const typeDefs = gql`
-  type User {
+  interface User {
     id: ID!
     name: String!
   }
 
+  type Me implements User {
+    id: ID!
+    name: String!
+    sessions: [Session!]
+  }
+
   type Session {
-    id: ID
+    id: ID!
     name: String!
     users: [User]
+    queue: [TrackUpdated!]!
     trackIds: [String]
     audioFeatures: [AudioFeatures]
   }
@@ -48,6 +55,7 @@ export const typeDefs = gql`
   }
 
   type AudioFeatures {
+    id: ID!
     acousticness: Float
     danceability: Float
     energy: Float
@@ -91,13 +99,23 @@ export const typeDefs = gql`
     code: String!
     success: Boolean!
     message: String
-    track: Track
+    track: TrackUpdated
   }
 
   type Query {
     search(query: String): [Track]
     userTopTracks(offset: Int, limit: Int): [Track]
     userTopArtists(offset: Int, limit: Int): [Artist]
-    sessions: [Session]
+    sessions: [Session!]
+    session(sessionId: ID!): Session
+  }
+
+  type Mutation {
+    createSession(sessionName: String!): Session
+    addToSession(sessionId: String!, track: TrackInput!): UpdateSessionResponse
+    removeFromSession(
+      sessionId: String!
+      track: TrackInput!
+    ): UpdateSessionResponse
   }
 `;

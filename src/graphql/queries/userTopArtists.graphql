@@ -1,0 +1,13 @@
+query UserTopArtists($offset: Int, $limit: Int) {
+  userTopArtists(offset: $offset, limit: $limit) {
+    id
+    name
+    uri
+    genres
+    images {
+      url
+      width
+      height
+    }
+  }
+}

@@ -1,12 +1,13 @@
 import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import { getAuthSession } from '../lib/session';
-import { useCreateSession } from '../graphql/mutations';
+import { useCreateSessionMutation } from '../generated/graphql';
 import Layout from '../components/Layout';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import SessionForm from '../components/SessionForm';
 import Sessions from '../components/Sessions';
+import TopArtist from '../components/TopArtists';
 
 const Main = styled.div`
   position: relative;
@@ -48,7 +49,7 @@ const ActionButton = styled(Button)`
 `;
 
 const Index = () => {
-  const [createSession] = useCreateSession();
+  const [createSession] = useCreateSessionMutation();
 
   return (
     <Layout>
@@ -67,6 +68,7 @@ const Index = () => {
           </Modal>
         </ActionBar>
         <Sessions />
+        <TopArtist />
       </Main>
     </Layout>
   );

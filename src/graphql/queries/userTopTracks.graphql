@@ -1,0 +1,17 @@
+query UserTopTracks($offset: Int, $limit: Int) {
+  userTopTracks(offset: $offset, limit: $limit) {
+    id
+    name
+    artists {
+      id
+      name
+    }
+    images {
+      url
+      width
+      height
+    }
+    duration_ms
+    uri
+  }
+}

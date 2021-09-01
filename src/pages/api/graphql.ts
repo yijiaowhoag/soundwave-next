@@ -1,24 +1,34 @@
-import { ApolloServer, AuthenticationError } from 'apollo-server-micro';
-import { schema } from '../../apollo/schema';
+import 'reflect-metadata';
+import { ApolloServer } from 'apollo-server-micro';
+import { NextApiRequest, NextApiResponse } from 'next';
+import path from 'path';
+import { buildSchema } from 'type-graphql';
+
+import { SessionResolver } from '../../resolvers/session';
+import { SpotifyResolver } from '../../resolvers/spotify';
 import { SpotifyAPI } from '../../services/spotify-api';
-import { getAuthSession } from '../../lib/session';
 
-const apolloServer = new ApolloServer({
-  schema,
-  dataSources: () => {
-    return { spotifyAPI: new SpotifyAPI() };
-  },
-  context: async ({ req }) => {
-    const authSession = await getAuthSession(req);
+let apolloHandler: ReturnType<typeof ApolloServer.prototype.createHandler>;
+const createApolloHandler = async () => {
+  const apolloServer = new ApolloServer({
+    schema: await buildSchema({
+      //  resolvers: [path.join(__dirname, '../resolvers/*.{ts,js}')],
+      resolvers: [SessionResolver, SpotifyResolver],
+      validate: false,
+    }),
+    context: ({ req }: { req: Request }) => ({
+      req,
+    }),
+    dataSources: () => {
+      return { spotifyAPI: new SpotifyAPI() };
+    },
+  });
 
-    if (!authSession) {
-      throw new AuthenticationError('You must be logged in');
-    }
+  await apolloServer.start();
+  apolloHandler = apolloServer.createHandler({ path: '/api/graphql' });
 
-    return { authSession };
-  },
-  playground: true,
-});
+  return apolloHandler;
+};
 
 export const config = {
   api: {
@@ -26,4 +36,8 @@ export const config = {
   },
 };
 
-export default apolloServer.createHandler({ path: '/api/graphql' });
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const apolloHandler = await createApolloHandler();
+
+  return apolloHandler(req, res);
+};

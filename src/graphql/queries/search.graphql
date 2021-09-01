@@ -1,0 +1,16 @@
+query Search($searchTerm: String!) {
+  search(query: $searchTerm) {
+    id
+    name
+    artists {
+      name
+    }
+    images {
+      url
+      width
+      height
+    }
+    duration_ms
+    uri
+  }
+}
