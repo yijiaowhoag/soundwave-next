@@ -86,3 +86,15 @@ export default () => {
     </Container>
   );
 };
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const user = await getAuthSession(context.req);
+
+  if (!user) {
+  }
+
+  return { props: { user } };
+};
+
