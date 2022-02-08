@@ -1,20 +1,64 @@
-import { useState } from 'react';
 import { useApolloClient } from '@apollo/client';
-import Select, { components } from 'react-select';
+import {
+  components,
+  StylesConfig,
+  DropdownIndicatorProps,
+  MultiValueGenericProps,
+  OptionProps,
+} from 'react-select';
 import AsyncSelect from 'react-select/async';
 import debounce from 'debounce-promise';
 import { FaSearch } from 'react-icons/fa';
-import { SEARCH } from '../graphql/queries';
+import { SearchDocument } from '../generated/graphql';
+import theme from '../theme';
 
-const Dropdown: React.FC = () => {
+type Option = {
+  value: string;
+  label: string;
+  artist: string;
+  imageUrl: string;
+};
+
+interface DropdownProps {
+  seeds: object[];
+  onUpdateSeeds: (seeds: object[]) => void;
+}
+
+const DropdownIndicator = (props: DropdownIndicatorProps<any>) => (
+  <components.DropdownIndicator {...props}>
+    <FaSearch />
+  </components.DropdownIndicator>
+);
+
+const MultiValueLabel = (props: MultiValueGenericProps<any>) => (
+  <components.MultiValueLabel {...props}>
+    <span>{props.data.label}</span>
+  </components.MultiValueLabel>
+);
+
+const Option = (props: OptionProps<any>) => (
+  <components.Option {...props}>
+    <div style={{ display: 'flex' }}>
+      <div style={{ width: 60, height: 60, marginRight: 10 }}>
+        <img
+          src={props.data.imageUrl}
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+      <h5>
+        <span>{props.data.label}</span> - <span>{props.data.artist}</span>
+      </h5>
+    </div>
+  </components.Option>
+);
+
+const Dropdown: React.FC<DropdownProps> = ({ seeds, onUpdateSeeds }) => {
   const client = useApolloClient();
-  const [searchResults, setSearchResults] = useState([]);
-  const [seeds, setSeeds] = useState([]);
 
   const getAsyncOptions = async (inputValue: string): Promise<any> => {
     return client
       .query({
-        query: SEARCH,
+        query: SearchDocument,
         variables: { searchTerm: inputValue.trim() },
       })
       .then((res) =>
@@ -34,71 +78,49 @@ const Dropdown: React.FC = () => {
   const loadOptions = (inputValue: string) => getAsyncOptions(inputValue);
   const debouncedLoadOptions = debounce(loadOptions, 1000);
 
-  const handleSelect = (selectedOption) => {
-    setSeeds({ selectedOption });
-  };
-
-  const formatOptionLabel = ({ value, label, artist, imageUrl }) => (
-    <div style={{ display: 'flex' }}>
-      <div style={{ width: 60, height: 60, marginRight: 10 }}>
-        <img src={imageUrl} style={{ width: '100%', height: '100%' }} />
-      </div>
-      <h5>
-        <span>{label}</span> - <span>{artist}</span>
-      </h5>
-    </div>
-  );
-
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      border: state.isFocused ? 0 : 0,
-      boxShadow: state.isFocused ? 0 : 0,
+  const customStyles: StylesConfig = {
+    control: (base) => ({
+      ...base,
       cursor: 'text',
+      border: 0,
+      borderBottom: '1px solid',
       borderRadius: 0,
-      borderBottom: 'solid 1px',
+      boxShadow: 'none',
       backgroundColor: 'transparent',
     }),
 
-    option: (provided, { isFocused }) => {
-      return {
-        ...provided,
-        cursor: 'pointer',
-        backgroundColor: isFocused ? 'white' : 'white',
-        color: isFocused ? 'rgba(255, 80, 86)' : 'black',
-        lineHeight: 2,
-      };
-    },
+    input: (base) => ({ ...base, color: 'white' }),
 
-    input: () => ({
+    multiValue: (base) => ({
+      ...base,
+      borderRadius: 20,
+      backgroundColor: theme.colors.lightGreen,
       color: 'white',
     }),
+
+    option: (base, { isFocused }) => ({
+      ...base,
+      cursor: 'pointer',
+      backgroundColor: isFocused
+        ? theme.colors.lightGreen
+        : theme.colors.darkGreen,
+      color: theme.colors.light,
+    }),
   };
-
-  const DropdownIndicator = ({ children, ...rest }) => (
-    <components.DropdownIndicator {...rest}>
-      <FaSearch />
-    </components.DropdownIndicator>
-  );
-
-  const MultiValue = (props) => (
-    <components.MultiValue {...props}>
-      <span>{props.data.label}</span> - <span>{props.data.artist}</span>
-    </components.MultiValue>
-  );
 
   return (
     <>
       <AsyncSelect
+        isMulti
         cacheOptions
         loadOptions={debouncedLoadOptions}
-        isMulti={true}
-        formatOptionLabel={formatOptionLabel}
-        onChange={handleSelect}
         placeholder="Search by Track"
-        classNamePrefix="select"
+        components={{
+          DropdownIndicator,
+          MultiValueLabel,
+          Option,
+        }}
         styles={customStyles}
-        components={{ DropdownIndicator, MultiValue }}
       />
       <div>{JSON.stringify(seeds)}</div>
     </>
