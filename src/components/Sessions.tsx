@@ -1,25 +1,26 @@
 import styled from 'styled-components';
 import { useSessionsQuery } from '../generated/graphql';
-import Session, { SessionCard } from './Session';
+import SessionCard from './SessionCard';
 
 const SessionsDiv = styled.div`
-  width: calc(100% - 2.5rem);
-  border-radius: 0 24px 24px 0;
+  width: 100%;
   padding: 5rem 0 2rem 0;
   overflow: auto;
-  background-color: rgba(255, 255, 255, 0.1);
-`;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1));
 
-const Sessions = styled.div`
-  display: flex;
-  width: fit-content;
+  ul {
+    display: flex;
+    width: fit-content;
+    padding: 0;
+    list-style: none;
 
-  ${SessionCard}:first-child {
-    margin-left: 4rem;
+    li:first-child {
+      margin-left: 0;
+    }
   }
 `;
 
-const AllSessions: React.FC = () => {
+const Sessions: React.FC = () => {
   const { data, loading } = useSessionsQuery();
 
   if (loading) {
@@ -31,11 +32,13 @@ const AllSessions: React.FC = () => {
   return (
     <SessionsDiv>
       {data.sessions.length !== 0 ? (
-        <Sessions>
+        <ul>
           {data.sessions.map((session) => (
-            <Session key={session.id} {...session} />
+            <li key={session.id}>
+              <SessionCard {...session} />
+            </li>
           ))}
-        </Sessions>
+        </ul>
       ) : (
         <p>
           <span>You do not have any session.</span>
@@ -46,4 +49,4 @@ const AllSessions: React.FC = () => {
   );
 };
 
-export default AllSessions;
+export default Sessions;
