@@ -178,6 +178,7 @@ export type Track = {
   images: Array<Image>;
   duration_ms: Scalars['Int'];
   uri: Scalars['String'];
+  preview_url?: Maybe<Scalars['String']>;
 };
 
 export type TrackInQueue = {
@@ -232,7 +233,7 @@ export type RecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, artists: Array<{ __typename?: 'Artist', name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: Maybe<number>, height?: Maybe<number> }> }> };
+export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, preview_url?: Maybe<string>, artists: Array<{ __typename?: 'Artist', name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: Maybe<number>, height?: Maybe<number> }> }> };
 
 export type SearchQueryVariables = Exact<{
   searchTerm: Scalars['String'];
@@ -432,6 +433,7 @@ export const RecommendationsDocument = gql`
     }
     duration_ms
     uri
+    preview_url
   }
 }
     `;

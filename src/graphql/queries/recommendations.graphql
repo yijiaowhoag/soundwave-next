@@ -12,5 +12,6 @@ query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
     }
     duration_ms
     uri
+    preview_url
   }
 }
