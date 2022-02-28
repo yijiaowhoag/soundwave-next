@@ -1,6 +1,16 @@
-import ReactDOM from 'react-dom';
-import { useState, useEffect, useRef } from 'react';
+import React, { cloneElement, useState } from 'react';
 import styled from 'styled-components';
+import Portal from './Portal';
+
+interface ModalProps {
+  activator: React.ReactElement;
+  children: ({ closeModal }: { closeModal: () => void }) => React.ReactElement;
+}
+
+interface ModalButtonProps {
+  children: React.ReactElement;
+  openModal: () => void;
+}
 
 const Overlay = styled.div`
   position: fixed;
@@ -8,6 +18,7 @@ const Overlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 99;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,57 +30,37 @@ const ContentContainer = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 99;
-  background-color: ${({ theme }) => theme.colors.lightGreen};
-  color: white;
+  z-index: 100;
 `;
 
-interface PortalProps {
-  children: React.ReactNode;
-  toggleModal?: () => void;
-}
+const ModalButton: React.FC<ModalButtonProps> = ({ children, openModal }) =>
+  cloneElement(children, {
+    onClick: openModal,
+  });
 
-const Portal: React.FC<PortalProps> = ({ children, toggleModal }) => {
-  const containerEl = useRef<HTMLDivElement | undefined>();
-
-  useEffect(() => {
-    const root: HTMLElement | null = document.getElementById('modal-root');
-    const el: HTMLDivElement = document.createElement('div');
-
-    containerEl.current = el;
-    root?.appendChild(el);
-
-    return () => {
-      root && el && root.removeChild(el);
-    };
-  }, []);
-
-  return (
-    (containerEl.current &&
-      ReactDOM.createPortal(children, containerEl.current)) ||
-    null
-  );
-};
-
-const Modal: React.FC<any> = ({ children, activator }) => {
+const Modal: React.FC<ModalProps> = ({ activator, children }) => {
   const [open, setOpen] = useState<boolean>(false);
+
+  const openModal = () => setOpen(true);
+
+  const closeModal = () => setOpen(false);
 
   return (
     <>
-      {activator({ setOpen })}
+      <ModalButton openModal={openModal}>{activator}</ModalButton>
       <Portal>
         {open && (
           <Overlay
             id="modal-overlay"
             onClick={(e) => {
-              if (e.target.id === 'modal-overlay') {
-                setOpen(false);
+              if ((e.target as Element).id === 'modal-overlay') {
+                closeModal();
               }
             }}
             role="button"
             aria-label="Overlay"
           >
-            <ContentContainer>{children}</ContentContainer>
+            <ContentContainer>{children({ closeModal })}</ContentContainer>
           </Overlay>
         )}
       </Portal>

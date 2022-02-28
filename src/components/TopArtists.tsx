@@ -1,56 +1,46 @@
 import styled from 'styled-components';
 import { useUserTopArtistsQuery } from '../generated/graphql';
-import Avatar from '../components/Avatar';
+
+interface TopArtistsProps {}
 
 const ArtistsDiv = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
 
-  &:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 45px;
-    height: 100%;
-    box-shadow: inset 15px 0 15px ${({ theme }) => theme.colors.darkGreen};
+  h2 {
+    margin: 2rem 0;
+    font-size: 20px;
   }
 
-  &:after {
-    content: '';
-    position: absolute;
-    right: 0;
-    width: 45px;
-    height: 100%;
-    box-shadow: inset -15px 0 15px ${({ theme }) => theme.colors.darkGreen};
-  }
-
-  > h2 {
-    margin-top: 0;
-    margin-left: 4rem;
+  ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    overflow-x: scroll;
+    list-style: none;
   }
 `;
 
-const Artist = styled.div`
-  margin-right: 1.2rem;
+const ArtistCard = styled.div`
+  margin-right: 1rem;
   text-align: center;
-
-  > h5 {
-    width: 80px;
-  }
 `;
 
-const Artists = styled.div`
-  display: flex;
-  overflow-x: scroll;
-  overflow-y: hidden;
-
-  > ${Artist}:first-child {
-    margin-left: 4rem;
-  }
+const ArtistImage = styled.div<{ imageSrc?: string }>`
+  width: 160px;
+  height: 120px;
+  border-radius: 5px;
+  background-image: url(${({ imageSrc }) => imageSrc});
+  background-size: cover;
+  background-position: center;
 `;
 
-const TopArtists: React.FC = () => {
+const ArtistName = styled.h5`
+  margin: 0.8rem 0;
+`;
+
+const TopArtists: React.FC<TopArtistsProps> = () => {
   const { data, loading } = useUserTopArtistsQuery({
     variables: {
       offset: 0,
@@ -66,15 +56,21 @@ const TopArtists: React.FC = () => {
 
   return (
     <ArtistsDiv>
-      <h2>Favorite Artists</h2>
-      <Artists>
-        {data.userTopArtists.map((artist: any) => (
-          <Artist key={artist.id}>
-            <Avatar src={artist.images[0].url} />
-            <h5>{artist.name}</h5>
-          </Artist>
+      <h2>Recent Artists</h2>
+      <ul>
+        {data.userTopArtists.map((artist) => (
+          <li key={artist.id}>
+            <ArtistCard>
+              <ArtistImage
+                imageSrc={
+                  artist.images.filter((image) => image.height < 640)[0].url
+                }
+              />
+              <ArtistName>{artist.name}</ArtistName>
+            </ArtistCard>
+          </li>
         ))}
-      </Artists>
+      </ul>
     </ArtistsDiv>
   );
 };
