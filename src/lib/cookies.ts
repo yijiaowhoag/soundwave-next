@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { serialize, parse } from 'cookie';
+import Cookie from 'js-cookie';
 
 const TOKEN_NAME = 'idToken';
 
@@ -41,4 +42,28 @@ export const removeTokenCookie = (res: NextApiResponse) => {
   });
 
   res.setHeader('Set-Cookie', cookie);
+};
+
+export const getUserFromLocalCookie = () => {
+  return Cookie.withConverter({ read: (v) => JSON.parse(v) }).get('user');
+};
+
+export const getAccessTokenFromLocalCookie = () => {
+  return Cookie.get('accessToken');
+};
+
+export const setToken = (idToken: string, accessToken: string) => {
+  if (!process.browser) {
+    return;
+  }
+  Cookie.set('pinkToken', idToken);
+  Cookie.set('accessToken', accessToken);
+};
+
+export const unsetToken = () => {
+  if (!process.browser) {
+    return;
+  }
+  Cookie.remove('idToken');
+  Cookie.remove('accessToken');
 };

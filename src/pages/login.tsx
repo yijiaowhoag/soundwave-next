@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import styled from 'styled-components';
 import { FaSpotify } from 'react-icons/fa';
+import useUser from '../hooks/useUser';
 import Layout from '../components/Layout';
 
 const LoginButton = styled.button`
@@ -29,15 +30,19 @@ const LoginButton = styled.button`
   }
 `;
 
-const Login = () => (
-  <Layout>
-    <Link href="/api/auth/login">
-      <LoginButton>
-        <FaSpotify className="icon" />
-        Sign in with Spotify
-      </LoginButton>
-    </Link>
-  </Layout>
-);
+const Login = () => {
+  const { user } = useUser({ redirectTo: '/dashboard', redirectIfFound: true }); // check if user is already logged in and redirect to dashboard
+
+  return (
+    <Layout>
+      <Link href="/api/auth/login">
+        <LoginButton>
+          <FaSpotify className="icon" />
+          Sign in with Spotify
+        </LoginButton>
+      </Link>
+    </Layout>
+  );
+};
 
 export default Login;
