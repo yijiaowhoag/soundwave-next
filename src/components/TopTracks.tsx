@@ -1,8 +1,10 @@
 import styled from 'styled-components';
 import { BsPlayFill } from 'react-icons/bs';
 import { useUserTopTracksQuery, AddTrackInput } from '../generated/graphql';
+import Modal from '../components/Modal';
+import { OutlineButton } from '../components/Button';
 import TrackCard from './TrackCard';
-import { OutlineButton } from './Button';
+import VerticalPlayer from './VerticalPlayer';
 
 interface TopTracksProps {}
 
@@ -52,10 +54,16 @@ const TopTracks: React.FC<TopTracksProps> = () => {
     <TopTracksDiv>
       <TopTracksHeader>
         <h2>Weekly Top Tracks</h2>
-        <PlayButton onClick={() => {}}>
-          Play
-          <BsPlayFill className="play-icon" />
-        </PlayButton>
+        <Modal
+          activator={
+            <PlayButton>
+              Play
+              <BsPlayFill className="play-icon" />
+            </PlayButton>
+          }
+        >
+          {({ closeModal }) => <VerticalPlayer queue={data?.userTopTracks} />}
+        </Modal>
       </TopTracksHeader>
       {loading && <p>Loading...</p>}
       {data && (

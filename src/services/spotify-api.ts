@@ -55,4 +55,11 @@ export class SpotifyAPI extends RESTDataSource {
 
     return this.get(`${this.baseURL}/recommendations?${str}`);
   }
+
+  async play(deviceId: string, uris: string[], offset?: number): Promise<void> {
+    return this.put(`${this.baseURL}/me/player/play?device_id=${deviceId}`, {
+      uris,
+      offset: offset && { position: offset },
+    });
+  }
 }

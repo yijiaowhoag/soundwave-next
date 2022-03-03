@@ -43,7 +43,6 @@ class MyDocument extends Document {
           <Main />
           <NextScript />
           <div id="modal-root" />
-          <script src="https://sdk.scdn.co/spotify-player.js"></script>
         </body>
       </Html>
     );

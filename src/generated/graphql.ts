@@ -90,6 +90,7 @@ export type Mutation = {
   deleteSession: Scalars['Boolean'];
   addToSession: TrackResponse;
   removeFromSession: TrackResponse;
+  play: Scalars['Boolean'];
 };
 
 
@@ -112,6 +113,13 @@ export type MutationAddToSessionArgs = {
 export type MutationRemoveFromSessionArgs = {
   track: RemoveTrackInput;
   sessionId: Scalars['String'];
+};
+
+
+export type MutationPlayArgs = {
+  offset?: Maybe<Scalars['Int']>;
+  uris: Array<Scalars['String']>;
+  deviceId: Scalars['String'];
 };
 
 export type Query = {
@@ -218,6 +226,15 @@ export type DeleteSessionMutationVariables = Exact<{
 
 
 export type DeleteSessionMutation = { __typename?: 'Mutation', deleteSession: boolean };
+
+export type PlayMutationVariables = Exact<{
+  deviceId: Scalars['String'];
+  uris: Array<Scalars['String']> | Scalars['String'];
+  offset?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type PlayMutation = { __typename?: 'Mutation', play: boolean };
 
 export type RemoveTrackMutationVariables = Exact<{
   sessionId: Scalars['String'];
@@ -382,6 +399,39 @@ export function useDeleteSessionMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteSessionMutationHookResult = ReturnType<typeof useDeleteSessionMutation>;
 export type DeleteSessionMutationResult = Apollo.MutationResult<DeleteSessionMutation>;
 export type DeleteSessionMutationOptions = Apollo.BaseMutationOptions<DeleteSessionMutation, DeleteSessionMutationVariables>;
+export const PlayDocument = gql`
+    mutation Play($deviceId: String!, $uris: [String!]!, $offset: Int) {
+  play(deviceId: $deviceId, uris: $uris, offset: $offset)
+}
+    `;
+export type PlayMutationFn = Apollo.MutationFunction<PlayMutation, PlayMutationVariables>;
+
+/**
+ * __usePlayMutation__
+ *
+ * To run a mutation, you first call `usePlayMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePlayMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [playMutation, { data, loading, error }] = usePlayMutation({
+ *   variables: {
+ *      deviceId: // value for 'deviceId'
+ *      uris: // value for 'uris'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function usePlayMutation(baseOptions?: Apollo.MutationHookOptions<PlayMutation, PlayMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PlayMutation, PlayMutationVariables>(PlayDocument, options);
+      }
+export type PlayMutationHookResult = ReturnType<typeof usePlayMutation>;
+export type PlayMutationResult = Apollo.MutationResult<PlayMutation>;
+export type PlayMutationOptions = Apollo.BaseMutationOptions<PlayMutation, PlayMutationVariables>;
 export const RemoveTrackDocument = gql`
     mutation RemoveTrack($sessionId: String!, $track: RemoveTrackInput!) {
   removeFromSession(sessionId: $sessionId, track: $track) {

@@ -6,10 +6,18 @@ interface ProgressBarProps {
   playerState?: Spotify.PlaybackState;
 }
 
+const BarContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`;
+
 const Bar = styled.div<{ progress: number }>`
-  height: 5px;
-  margin-top: 0.5rem;
-  border-radius: 2.5px;
+  width: 100%;
+  height: 0.2em;
+  margin: 0 0.5em;
+  border-radius: 0.1em;
   background: ${({ progress, theme }) =>
     `linear-gradient(
     to right,
@@ -21,9 +29,7 @@ const Bar = styled.div<{ progress: number }>`
 `;
 
 const Info = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
+  font-size: 1em;
 `;
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ playerState }) => {
@@ -46,14 +52,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ playerState }) => {
   }, [playerState]);
 
   const percentage = playerState ? (progress / playerState.duration) * 100 : 0;
+
   return (
-    <>
-      <Info>
-        <div>{convertDurationMs(progress)}</div>
-        <div>{convertDurationMs(playerState?.duration || 0)}</div>
-      </Info>
+    <BarContainer>
+      <Info>{convertDurationMs(progress)}</Info>
       <Bar progress={percentage}></Bar>
-    </>
+      <Info>{convertDurationMs(playerState?.duration || 0)}</Info>
+    </BarContainer>
   );
 };
 

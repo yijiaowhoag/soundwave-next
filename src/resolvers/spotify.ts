@@ -206,4 +206,22 @@ export class SpotifyResolver {
 
     return items;
   }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async play(
+    @Arg('deviceId', () => String) deviceId: string,
+    @Arg('uris', () => [String!]) uris: string[],
+    @Arg('offset', () => Int, { nullable: true })
+    offset: number,
+    @Ctx() { dataSources }: Context
+  ): Promise<boolean> {
+    const response = await dataSources.spotifyAPI.play(deviceId, uris, offset);
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return true;
+  }
 }

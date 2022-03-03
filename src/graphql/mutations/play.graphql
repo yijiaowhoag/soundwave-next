@@ -1,0 +1,3 @@
+mutation Play($deviceId: String!, $uris: [String!]!, $offset: Int) {
+  play(deviceId: $deviceId, uris: $uris, offset: $offset)
+}
