@@ -1,6 +1,7 @@
 import { AuthenticationError } from 'apollo-server-micro';
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest';
 import querystring from 'querystring';
+import { Context, RepeatMode } from '../types';
 
 interface Paging<T> {
   items: T[];
@@ -61,5 +62,17 @@ export class SpotifyAPI extends RESTDataSource {
       uris,
       offset: offset && { position: offset },
     });
+  }
+
+  async toggleShuffle(deviceId: string, state: boolean): Promise<void> {
+    return this.put(
+      `${this.baseURL}/me/player/shuffle?device_id=${deviceId}&state=${state}`
+    );
+  }
+
+  async toggleRepeat(deviceId: string, state: RepeatMode): Promise<void> {
+    return this.put(
+      `${this.baseURL}/me/player/repeat?device_id=${deviceId}&state=${state}`
+    );
   }
 }

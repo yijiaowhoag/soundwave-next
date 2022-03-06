@@ -1,0 +1,3 @@
+mutation Shuffle($deviceId: String!, $state: Boolean!) {
+  shuffle(deviceId: $deviceId, state: $state)
+}

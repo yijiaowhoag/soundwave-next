@@ -12,7 +12,7 @@ import {
 import { Track } from '../entities/Track';
 import { FavoriteArtist } from '../entities/Artist';
 import { isAuth } from '../middleware/isAuth';
-import { Context } from '../types';
+import { Context, RepeatMode } from '../types';
 
 interface TrackArtistObject {
   external_urls: object;
@@ -33,6 +33,8 @@ interface ImageObject {
   url: string;
   width: number;
 }
+
+registerEnumType(RepeatMode, { name: 'RepeatMode' });
 
 @InputType()
 export class AudioFiltersInput {
@@ -222,6 +224,41 @@ export class SpotifyResolver {
       throw new Error(response.error.message);
     }
 
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async shuffle(
+    @Arg('deviceId', () => String) deviceId: string,
+    @Arg('state', () => Boolean) state: boolean,
+    @Ctx() { dataSources }: Context
+  ): Promise<boolean> {
+    const response = await dataSources.spotifyAPI.toggleShuffle(
+      deviceId,
+      state
+    );
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async repeat(
+    @Arg('deviceId', () => String) deviceId: string,
+    @Arg('state', () => RepeatMode) state: RepeatMode,
+    @Ctx() { dataSources }: Context
+  ): Promise<boolean> {
+    const response = await dataSources.spotifyAPI.toggleRepeat(deviceId, state);
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return true
+  }
     return true;
   }
 }

@@ -9,10 +9,18 @@ import {
   BsShuffle,
   BsArrowRepeat,
 } from 'react-icons/bs';
-import { usePlayMutation, TrackInQueue } from '../generated/graphql';
+import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import {
+  usePlayMutation,
+  useShuffleMutation,
+  useRepeatMutation,
+  TrackInQueue,
+  RepeatMode,
+} from '../generated/graphql';
 import usePlayer from '../hooks/usePlayer';
 import ProgressBar from './ProgressBar';
 import Queue from './Queue';
+import VolumeRangeSlider from './VolumeRangeSlider';
 
 interface VerticalPlayerProps {
   queue?: TrackInQueue[];
@@ -44,6 +52,12 @@ const PlayerContainer = styled.div`
   }
 `;
 
+const PlayerHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+`;
+
 const TrackImage = styled.img`
   width: 8.5em;
   height: 8.5em;
@@ -73,28 +87,39 @@ const Controls = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 1em;
+  margin-top: 1.2em;
+`;
+
+const ControlIcon = styled.div<{ on?: boolean }>`
+  margin: 0 1.2em;
+  cursor: pointer;
 
   .icon {
-    width: 1.2em;
-    height: 1.2em;
+    width: 1.4em;
+    height: 1.4em;
   }
 
   .icon-lg {
-    width: 2rem;
-    height: 2rem;
+    width: 2.4em;
+    height: 2.4em;
   }
 `;
 
-const ControlIcon = styled.div`
-  margin: 0 1em;
-  cursor: pointer;
+const VolumeControlIcon = styled(ControlIcon)`
+  position: relative;
+  margin: 0;
 `;
 
 const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
   const [playerState, setPlayerState] = useState<Spotify.PlaybackState>();
   const [current, setCurrent] = useState<Spotify.Track>();
+  const [isMuted, setMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.5);
+  const [isShuffle, setShuffle] = useState<boolean>(false);
+  const [repeatMode, setRepeatMode] = useState<number>(0);
   const [play] = usePlayMutation();
+  const [shuffle] = useShuffleMutation();
+  const [repeat] = useRepeatMutation();
 
   const { deviceId, player } = usePlayer({
     getOAuthToken: () =>
@@ -113,6 +138,8 @@ const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
 
     const current_track = playerState.track_window.current_track;
     setCurrent(current_track);
+    setShuffle(playerState.shuffle);
+    setRepeatMode(playerState.repeat_mode);
   }, [playerState]);
 
   useEffect(() => {
@@ -125,6 +152,35 @@ const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
     });
   }, [player, deviceId]);
 
+  useEffect(() => {
+    if (!player) return;
+
+    if (isMuted) {
+      player.setVolume(0.000001);
+    } else {
+      player.setVolume(volume);
+    }
+  }, [isMuted, volume]);
+
+  const toggleShuffle = () => {
+    if (!deviceId || !playerState) return;
+
+    shuffle({
+      variables: { deviceId, state: !playerState.shuffle },
+    });
+  };
+
+  const toggleRepeat = () => {
+    if (!deviceId || !playerState) return;
+
+    repeat({
+      variables: {
+        deviceId,
+        state: repeatMode === 0 ? RepeatMode.Track : RepeatMode.Off,
+      },
+    });
+  };
+
   return (
     <>
       <Head>
@@ -132,7 +188,22 @@ const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
       </Head>
       <Container>
         <PlayerContainer>
-          <h2>Now Playing</h2>
+          <PlayerHeader>
+            <h2>Now Playing</h2>
+            <VolumeControlIcon>
+              {isMuted ? (
+                <FaVolumeMute className="icon" />
+              ) : (
+                <FaVolumeUp className="icon" />
+              )}
+              <VolumeRangeSlider
+                isMuted={isMuted}
+                setMuted={setMuted}
+                volume={volume}
+                setVolume={setVolume}
+              />
+            </VolumeControlIcon>
+          </PlayerHeader>
           {current && (
             <TrackInfo>
               <TrackImage
@@ -152,7 +223,7 @@ const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
           <ControlPanel>
             <ProgressBar playerState={playerState} />
             <Controls>
-              <ControlIcon>
+              <ControlIcon on={isShuffle} onClick={toggleShuffle}>
                 <BsShuffle className="icon" />
               </ControlIcon>
               <ControlIcon onClick={() => player?.previousTrack()}>
@@ -169,7 +240,7 @@ const VerticalPlayer: React.FC<VerticalPlayerProps> = ({ queue }) => {
               <ControlIcon onClick={() => player?.nextTrack()}>
                 <BsSkipEndFill className="icon" />
               </ControlIcon>
-              <ControlIcon>
+              <ControlIcon on={repeatMode !== 0} onClick={toggleRepeat}>
                 <BsArrowRepeat className="icon" />
               </ControlIcon>
             </Controls>

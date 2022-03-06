@@ -1,0 +1,3 @@
+mutation Repeat($deviceId: String!, $state: RepeatMode!) {
+  repeat(deviceId: $deviceId, state: $state)
+}

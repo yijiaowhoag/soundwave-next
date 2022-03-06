@@ -91,6 +91,8 @@ export type Mutation = {
   addToSession: TrackResponse;
   removeFromSession: TrackResponse;
   play: Scalars['Boolean'];
+  shuffle: Scalars['Boolean'];
+  repeat: Scalars['Boolean'];
 };
 
 
@@ -119,6 +121,18 @@ export type MutationRemoveFromSessionArgs = {
 export type MutationPlayArgs = {
   offset?: Maybe<Scalars['Int']>;
   uris: Array<Scalars['String']>;
+  deviceId: Scalars['String'];
+};
+
+
+export type MutationShuffleArgs = {
+  state: Scalars['Boolean'];
+  deviceId: Scalars['String'];
+};
+
+
+export type MutationRepeatArgs = {
+  state: RepeatMode;
   deviceId: Scalars['String'];
 };
 
@@ -169,6 +183,12 @@ export type RemoveTrackInput = {
   uri: Scalars['String'];
   timestamp: Scalars['String'];
 };
+
+export enum RepeatMode {
+  Track = 'TRACK',
+  Context = 'CONTEXT',
+  Off = 'OFF'
+}
 
 export type Session = {
   __typename?: 'Session';
@@ -243,6 +263,22 @@ export type RemoveTrackMutationVariables = Exact<{
 
 
 export type RemoveTrackMutation = { __typename?: 'Mutation', removeFromSession: { __typename?: 'TrackResponse', track: { __typename?: 'TrackInQueue', id: string } } };
+
+export type RepeatMutationVariables = Exact<{
+  deviceId: Scalars['String'];
+  state: RepeatMode;
+}>;
+
+
+export type RepeatMutation = { __typename?: 'Mutation', repeat: boolean };
+
+export type ShuffleMutationVariables = Exact<{
+  deviceId: Scalars['String'];
+  state: Scalars['Boolean'];
+}>;
+
+
+export type ShuffleMutation = { __typename?: 'Mutation', shuffle: boolean };
 
 export type RecommendationsQueryVariables = Exact<{
   seeds?: Maybe<Array<Scalars['String']> | Scalars['String']>;
@@ -468,6 +504,70 @@ export function useRemoveTrackMutation(baseOptions?: Apollo.MutationHookOptions<
 export type RemoveTrackMutationHookResult = ReturnType<typeof useRemoveTrackMutation>;
 export type RemoveTrackMutationResult = Apollo.MutationResult<RemoveTrackMutation>;
 export type RemoveTrackMutationOptions = Apollo.BaseMutationOptions<RemoveTrackMutation, RemoveTrackMutationVariables>;
+export const RepeatDocument = gql`
+    mutation Repeat($deviceId: String!, $state: RepeatMode!) {
+  repeat(deviceId: $deviceId, state: $state)
+}
+    `;
+export type RepeatMutationFn = Apollo.MutationFunction<RepeatMutation, RepeatMutationVariables>;
+
+/**
+ * __useRepeatMutation__
+ *
+ * To run a mutation, you first call `useRepeatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRepeatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [repeatMutation, { data, loading, error }] = useRepeatMutation({
+ *   variables: {
+ *      deviceId: // value for 'deviceId'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useRepeatMutation(baseOptions?: Apollo.MutationHookOptions<RepeatMutation, RepeatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RepeatMutation, RepeatMutationVariables>(RepeatDocument, options);
+      }
+export type RepeatMutationHookResult = ReturnType<typeof useRepeatMutation>;
+export type RepeatMutationResult = Apollo.MutationResult<RepeatMutation>;
+export type RepeatMutationOptions = Apollo.BaseMutationOptions<RepeatMutation, RepeatMutationVariables>;
+export const ShuffleDocument = gql`
+    mutation Shuffle($deviceId: String!, $state: Boolean!) {
+  shuffle(deviceId: $deviceId, state: $state)
+}
+    `;
+export type ShuffleMutationFn = Apollo.MutationFunction<ShuffleMutation, ShuffleMutationVariables>;
+
+/**
+ * __useShuffleMutation__
+ *
+ * To run a mutation, you first call `useShuffleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useShuffleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [shuffleMutation, { data, loading, error }] = useShuffleMutation({
+ *   variables: {
+ *      deviceId: // value for 'deviceId'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useShuffleMutation(baseOptions?: Apollo.MutationHookOptions<ShuffleMutation, ShuffleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ShuffleMutation, ShuffleMutationVariables>(ShuffleDocument, options);
+      }
+export type ShuffleMutationHookResult = ReturnType<typeof useShuffleMutation>;
+export type ShuffleMutationResult = Apollo.MutationResult<ShuffleMutation>;
+export type ShuffleMutationOptions = Apollo.BaseMutationOptions<ShuffleMutation, ShuffleMutationVariables>;
 export const RecommendationsDocument = gql`
     query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
   recommendations(seeds: $seeds, filters: $filters) {
