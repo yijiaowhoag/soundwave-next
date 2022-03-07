@@ -23,15 +23,10 @@ const SessionsDiv = styled.div`
 const Sessions: React.FC = () => {
   const { data, loading } = useSessionsQuery();
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!data?.sessions) return null;
-
   return (
     <SessionsDiv>
-      {data.sessions.length !== 0 ? (
+      {loading && <p>Loading...</p>}
+      {data?.sessions && data.sessions.length > 0 ? (
         <ul>
           {data.sessions.map((session) => (
             <li key={session.id}>
@@ -42,7 +37,6 @@ const Sessions: React.FC = () => {
       ) : (
         <p>
           <span>You do not have any session.</span>
-          <span>Create new session</span>
         </p>
       )}
     </SessionsDiv>

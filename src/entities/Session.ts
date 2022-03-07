@@ -9,9 +9,6 @@ export class Session {
   @Field()
   name!: string;
 
-  @Field(() => [ID])
-  trackIds: string[];
-
-  @Field(() => [TrackInQueue], { nullable: true })
-  queue?: TrackInQueue[];
+  @Field(() => [TrackInQueue])
+  queue: TrackInQueue[];
 }

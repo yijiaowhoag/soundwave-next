@@ -1,7 +1,5 @@
-import { GetServerSidePropsContext } from 'next';
 import styled from 'styled-components';
 import { FaPlus } from 'react-icons/fa';
-import { getAuthSession } from '../lib/authSession';
 import {
   useCreateSessionMutation,
   SessionsDocument,
@@ -74,23 +72,6 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
       <TopArtist />
     </Main>
   );
-};
-
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const user = await getAuthSession(context.req);
-
-  if (!user) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: '/api/auth/login',
-      },
-    };
-  }
-
-  return { props: { user } };
 };
 
 export default Dashboard;

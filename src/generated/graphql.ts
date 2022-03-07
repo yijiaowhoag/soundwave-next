@@ -194,8 +194,7 @@ export type Session = {
   __typename?: 'Session';
   id: Scalars['ID'];
   name: Scalars['String'];
-  trackIds: Array<Scalars['ID']>;
-  queue?: Maybe<Array<TrackInQueue>>;
+  queue: Array<TrackInQueue>;
 };
 
 export type Track = {
@@ -300,7 +299,7 @@ export type SessionQueryVariables = Exact<{
 }>;
 
 
-export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, queue?: Maybe<Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp?: Maybe<string>, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: Maybe<number>, height?: Maybe<number> }> }>> } };
+export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, queue: Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp?: Maybe<string>, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: Maybe<number>, height?: Maybe<number> }> }> } };
 
 export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
