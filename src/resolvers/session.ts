@@ -132,12 +132,14 @@ export class SessionResolver {
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async createSession(
-    @Arg('sessionName') sessionName: string,
+    @Arg('name') name: string,
+    @Arg('description', { nullable: true }) description: string,
     @Ctx() ctx: Context
   ): Promise<boolean> {
     try {
       await db.collection('sessions').add({
-        name: sessionName,
+        name,
+        description,
         creatorId: ctx.authSession.id,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });

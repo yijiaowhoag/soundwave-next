@@ -97,7 +97,8 @@ export type Mutation = {
 
 
 export type MutationCreateSessionArgs = {
-  sessionName: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
 };
 
 
@@ -194,6 +195,7 @@ export type Session = {
   __typename?: 'Session';
   id: Scalars['ID'];
   name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   queue: Array<TrackInQueue>;
 };
 
@@ -233,7 +235,8 @@ export type AddTrackMutationVariables = Exact<{
 export type AddTrackMutation = { __typename?: 'Mutation', addToSession: { __typename?: 'TrackResponse', track: { __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp?: Maybe<string>, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: Maybe<number>, height?: Maybe<number> }> } } };
 
 export type CreateSessionMutationVariables = Exact<{
-  sessionName: Scalars['String'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -304,7 +307,7 @@ export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Sess
 export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, name: string }> };
+export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, name: string, description?: Maybe<string> }> };
 
 export type UserTopArtistsQueryVariables = Exact<{
   offset?: Maybe<Scalars['Int']>;
@@ -373,8 +376,8 @@ export type AddTrackMutationHookResult = ReturnType<typeof useAddTrackMutation>;
 export type AddTrackMutationResult = Apollo.MutationResult<AddTrackMutation>;
 export type AddTrackMutationOptions = Apollo.BaseMutationOptions<AddTrackMutation, AddTrackMutationVariables>;
 export const CreateSessionDocument = gql`
-    mutation CreateSession($sessionName: String!) {
-  createSession(sessionName: $sessionName)
+    mutation CreateSession($name: String!, $description: String) {
+  createSession(name: $name, description: $description)
 }
     `;
 export type CreateSessionMutationFn = Apollo.MutationFunction<CreateSessionMutation, CreateSessionMutationVariables>;
@@ -392,7 +395,8 @@ export type CreateSessionMutationFn = Apollo.MutationFunction<CreateSessionMutat
  * @example
  * const [createSessionMutation, { data, loading, error }] = useCreateSessionMutation({
  *   variables: {
- *      sessionName: // value for 'sessionName'
+ *      name: // value for 'name'
+ *      description: // value for 'description'
  *   },
  * });
  */
@@ -718,6 +722,7 @@ export const SessionsDocument = gql`
   sessions {
     id
     name
+    description
   }
 }
     `;

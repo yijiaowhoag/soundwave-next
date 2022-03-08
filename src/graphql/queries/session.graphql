@@ -2,6 +2,7 @@ query Session($sessionId: String!) {
   session(sessionId: $sessionId) {
     id
     name
+    description
     queue {
       id
       name

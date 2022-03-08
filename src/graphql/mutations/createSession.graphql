@@ -1,3 +1,3 @@
-mutation CreateSession($sessionName: String!) {
-  createSession(sessionName: $sessionName)
+mutation CreateSession($name: String!, $description: String) {
+  createSession(name: $name, description: $description)
 }

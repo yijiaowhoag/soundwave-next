@@ -63,11 +63,17 @@ const Card = styled.div`
         bottom 0.8s ${({ theme }) => theme.animations.bezier};
     }
   }
+`;
 
-  h3 {
-    position: relative;
-    z-index: 1;
-  }
+const SessionName = styled.h3`
+  position: relative;
+  z-index: 1;
+`;
+
+const SessionDescription = styled.p`
+  margin-right: 1rem;
+  font-size: 14px;
+  opacity: 0.5;
 `;
 
 const DeleteIconWrapper = styled.div`
@@ -86,9 +92,10 @@ const DeleteIconWrapper = styled.div`
 interface SessionCardProps {
   id: string;
   name: string;
+  description?: string;
 }
 
-const SessionCard: React.FC<SessionCardProps> = ({ id, name }) => {
+const SessionCard: React.FC<SessionCardProps> = ({ id, name, description }) => {
   const [deleteSession] = useDeleteSessionMutation({
     variables: { sessionId: id },
     refetchQueries: [{ query: SessionsDocument }],
@@ -101,7 +108,8 @@ const SessionCard: React.FC<SessionCardProps> = ({ id, name }) => {
     >
       <Card>
         <Overlay />
-        <h3>{name}</h3>
+        <SessionName>{name}</SessionName>
+        {description && <SessionDescription>{description}</SessionDescription>}
         <DeleteIconWrapper>
           <TiDelete
             onClick={(e) => {

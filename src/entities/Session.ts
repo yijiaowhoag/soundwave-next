@@ -9,6 +9,9 @@ export class Session {
   @Field()
   name!: string;
 
+  @Field(() => String, { nullable: true })
+  description: string;
+
   @Field(() => [TrackInQueue])
   queue: TrackInQueue[];
 }
