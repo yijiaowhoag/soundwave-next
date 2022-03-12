@@ -1,4 +1,4 @@
-import { createRef, useState } from 'react';
+import { createRef, forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   BsPlayFill,
@@ -6,10 +6,16 @@ import {
   BsSuitHeartFill,
   BsSuitHeart,
 } from 'react-icons/bs';
-import { Track } from '../generated/graphql';
+import { useAddTrackMutation, Track } from '../generated/graphql';
 import { convertDurationMs } from '../utils/convertDuration';
-import IconButton from './IconButton';
 import PreviewAudio from './PreviewAudio';
+import Menu from './Menu';
+
+const TrackImageContainer = styled.div`
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+`;
 
 const TrackImage = styled.img`
   position: relative;
@@ -39,18 +45,17 @@ const PlayIconWrapper = styled.div`
 `;
 
 const TrackContent = styled.div`
-  position: relative;
   display: flex;
   flex: 1;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1.5px solid ${({ theme }) => theme.colors.lightGreen30};
-  padding: 0.6rem 1rem 0.6rem 1.8rem;
+  padding: 0.5rem 1rem 0.5rem 1.8rem;
 
   > div:nth-of-type(1) {
     display: flex;
     flex-direction: column;
     width: 60%;
+    text-overflow: ellipsis;
   }
 
   > div:nth-of-type(2) {
@@ -64,7 +69,10 @@ const HoverOverlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: ${({ theme }) => theme.colors.lightGreen30};
+  z-index: -1;
+  background: ${({ theme }) =>
+    `linear-gradient(to right, ${theme.colors.lightGreen30} 60%, transparent)`};
+  background-color: hotpink;
   opacity: 0;
 `;
 
@@ -74,7 +82,6 @@ const TrackContainer = styled.div`
   align-items: center;
   width: 100%;
   margin-top: 1rem;
-  padding-left: 1rem;
 
   &:hover {
     ${TrackImage} {
@@ -139,65 +146,67 @@ interface PlayableTrackProps {
   onAdd?: (track: Track) => void;
 }
 
-const PlayableTrack: React.FC<PlayableTrackProps> = ({ track, onAdd }) => {
-  const audioRef = createRef<HTMLAudioElement>();
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+const PlayableTrack: React.FC<PlayableTrackProps> = forwardRef(
+  ({ track }, ref) => {
+    const audioRef = createRef<HTMLAudioElement>();
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [addTrack] = useAddTrackMutation();
 
-  const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current?.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current?.play();
-      setIsPlaying(true);
-    }
-  };
+    const togglePlay = () => {
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current?.play();
+        setIsPlaying(true);
+      }
+    };
 
-  return (
-    <TrackContainer onClick={togglePlay}>
-      <div style={{ position: 'relative' }}>
-        {track.preview_url && (
-          <PlayIconWrapper>
-            {isPlaying ? (
-              <BsPauseFill className="pause-icon" />
-            ) : (
-              <BsPlayFill className="play-icon" />
-            )}
-          </PlayIconWrapper>
-        )}
-        <TrackImage
-          src={track.images.find((image) => image.height === 300)?.url}
-        />
-      </div>
-      <TrackContent>
-        <div>
-          <TrackName>{track.name}</TrackName>
-          <TrackArtists>
-            {track.artists
-              .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
-              .join(', ')}
-          </TrackArtists>
-        </div>
-        <div>
+    return (
+      <TrackContainer>
+        <TrackImageContainer onClick={togglePlay}>
           {track.preview_url && (
-            <TrackPreview>
-              <span>Preview</span>
-              <PreviewAudio ref={audioRef} preview_url={track.preview_url} />
-            </TrackPreview>
+            <PlayIconWrapper>
+              {isPlaying ? (
+                <BsPauseFill className="pause-icon" />
+              ) : (
+                <BsPlayFill className="play-icon" />
+              )}
+            </PlayIconWrapper>
           )}
-          <span>{convertDurationMs(track.duration_ms)}</span>
-          {onAdd && (
-            <IconWrapper>
-              <IconButton onClick={() => onAdd(track)}>
-                <BsSuitHeartFill />
-              </IconButton>
-            </IconWrapper>
-          )}
-        </div>
+          <TrackImage
+            src={track.images.find((image) => image.height === 300)?.url}
+          />
+        </TrackImageContainer>
+        <TrackContent>
+          <div>
+            <TrackName>{track.name}</TrackName>
+            <TrackArtists>
+              {track.artists
+                .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
+                .join(', ')}
+            </TrackArtists>
+          </div>
+          <div>
+            {track.preview_url && (
+              <TrackPreview>
+                <span>Preview</span>
+                <PreviewAudio ref={audioRef} preview_url={track.preview_url} />
+              </TrackPreview>
+            )}
+            <span>{convertDurationMs(track.duration_ms)}</span>
+            <Menu
+              ref={ref}
+              onAdd={(sessionId) =>
+                addTrack({ variables: { sessionId, track } })
+              }
+            />
+          </div>
+        </TrackContent>
         <HoverOverlay />
-      </TrackContent>
-    </TrackContainer>
-  );
-};
+      </TrackContainer>
+    );
+  }
+);
 
 export default PlayableTrack;
