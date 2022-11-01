@@ -1,26 +1,33 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAccessToken } from '../../../services/auth';
-import { encryptSession } from '../../../lib/session';
-import { setTokenCookie } from '../../../lib/cookies';
+import { getAccessToken, getSelf } from '../../../services/auth';
+import { encryptSession } from '../../../lib/authSession';
+import { setCookie } from '../../../lib/cookies';
+import { findOrCreateUser } from '../../../lib/user';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  let resp;
   try {
-    resp = await getAccessToken(req.query.code);
+    const { access_token, refresh_token, expires_in } = await getAccessToken(
+      req.query.code
+    );
+    const me = await getSelf(access_token);
+
+    const user = await findOrCreateUser(me);
 
     const session = {
-      accessToken: resp.access_token,
-      refreshToken: resp.refresh_token,
-      expiresAt: Date.now() + resp.expires_in * 1000,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      expiresAt: Date.now() + expires_in * 1000,
+      id: user.id,
     };
-    const token = await encryptSession(session);
-    setTokenCookie(res, token);
 
-    return res.redirect('/');
+    const token = await encryptSession(session);
+    setCookie(res, token);
+
+    res.redirect('/');
   } catch (err) {
     console.error(err);
 
-    res.status(401).send(err.message);
+    res.status(401).send(JSON.stringify(err));
   }
 };
 

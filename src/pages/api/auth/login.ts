@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     state: '',
   });
 
-  return res.redirect(`${process.env.SPOTIFY_AUTH_ENDPOINT}?${qs}`);
+  res.redirect(`${process.env.SPOTIFY_AUTH_ENDPOINT}?${qs}`);
 };
 
 export default handler;

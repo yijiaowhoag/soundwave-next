@@ -1,10 +1,11 @@
 import '../styles/globals.css';
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
-import { AuthProvider } from '../contexts/AuthContext';
 import { useApollo } from '../apollo/client';
 import { ThemeProvider } from 'styled-components';
 import theme from '../theme';
+import { AuthProvider } from '../contexts/AuthContext';
+import { SDKProvider } from '../contexts/SDKContext';
 
 function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps.initialApolloState);
@@ -13,9 +14,9 @@ function App({ Component, pageProps }: AppProps) {
     <ApolloProvider client={apolloClient}>
       <ThemeProvider theme={theme}>
         <AuthProvider>
-          <Layout>
+          <SDKProvider>
             <Component {...pageProps} />
-          </Layout>
+          </SDKProvider>
         </AuthProvider>
       </ThemeProvider>
     </ApolloProvider>

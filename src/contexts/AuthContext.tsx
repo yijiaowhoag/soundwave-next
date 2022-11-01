@@ -1,21 +1,30 @@
-import { createContext, useEffect, useState } from 'react';
-import { getAccessTokenFromLocalCookie } from '../lib/cookies';
+import { useRouter } from 'next/router';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { AuthSession } from '../lib/authSession';
 
-export const AuthContext = createContext<any>(null);
+export const AuthContext = createContext<AuthSession | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string>();
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider: React.FC = ({ children }) => {
+  const router = useRouter();
+  const [isLoading, setLoading] = useState(true);
+  const [user, setUser] = useState();
 
   useEffect(() => {
-    const token = getAccessTokenFromLocalCookie();
-    setToken(token);
-    setLoading(false);
-  }, [loading]);
+    setLoading(true);
+    async function fetchUser() {
+      const resp = await fetch('/api/auth/user');
 
-  if (loading) return <span>Loading...</span>;
+      if (resp.status === 200) {
+        setUser((await resp.json()).user);
+        setLoading(false);
+      }
 
-  return (
-    <AuthContext.Provider value={{ token }}>{children}</AuthContext.Provider>
-  );
+      if (resp.status === 401) router.push('/auth/login');
+    }
+    fetchUser();
+  }, []);
+
+  return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;
 };

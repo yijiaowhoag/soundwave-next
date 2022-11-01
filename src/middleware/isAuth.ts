@@ -1,7 +1,7 @@
 import { MiddlewareFn } from 'type-graphql';
 import { AuthenticationError } from 'apollo-server-micro';
 import { Context } from '../types';
-import { getAuthSession } from '../lib/session';
+import { getAuthSession } from '../lib/authSession';
 
 export const isAuth: MiddlewareFn<Context> = async (
   { context },

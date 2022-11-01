@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { FaPlus } from 'react-icons/fa';
+import { getServerSideProps } from '../lib/getServerSideProps';
 import Modal from '../components/Modal';
 import { OutlineButton } from '../components/Button';
 import SessionForm from '../components/SessionForm';
@@ -61,5 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => (
     <TopArtist />
   </Main>
 );
+
+export { getServerSideProps };
 
 export default Dashboard;
