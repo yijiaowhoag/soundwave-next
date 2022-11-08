@@ -6,8 +6,9 @@ import React, {
   useEffect,
 } from 'react';
 import styled from 'styled-components';
+import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
-interface VolumeRangeSliderProps {
+interface VolumeProps {
   isMuted: boolean;
   setMuted: (isMuted: boolean) => void;
   volume: number;
@@ -80,7 +81,7 @@ const Input = styled.input`
   }
 `;
 
-const VolumeRangeSlider: React.FC<VolumeRangeSliderProps> = ({
+const Volume: React.FC<VolumeProps> = ({
   min = 0,
   max = 1,
   isMuted,
@@ -159,4 +160,60 @@ const VolumeRangeSlider: React.FC<VolumeRangeSliderProps> = ({
   );
 };
 
-export default VolumeRangeSlider;
+const VolumeControlIcon = styled.div`
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+
+  .icon {
+    width: 1.4em;
+    height: 1.4em;
+  }
+
+  .icon-lg {
+    width: 2.4em;
+    height: 2.4em;
+  }
+`;
+
+const VolumeSlider = styled.div<{ open: boolean }>`
+  transform: ${({ open }) => (open ? `scale(1)` : `scale(0)`)};
+`;
+
+interface VolumeControlProps {
+  onVolumeChange: (volume: number) => void;
+}
+
+const VolumeControl: React.FC<VolumeControlProps> = ({ onVolumeChange }) => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [isMuted, setMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.5);
+
+  useEffect(() => {
+    if (isMuted) {
+      onVolumeChange(0);
+    } else {
+      onVolumeChange(volume);
+    }
+  }, [isMuted, volume]);
+
+  return (
+    <VolumeControlIcon onClick={() => setOpen(!open)}>
+      {isMuted ? (
+        <FaVolumeMute className="icon" />
+      ) : (
+        <FaVolumeUp className="icon" />
+      )}
+      <VolumeSlider open={open}>
+        <Volume
+          isMuted={isMuted}
+          setMuted={setMuted}
+          volume={volume}
+          setVolume={setVolume}
+        />
+      </VolumeSlider>
+    </VolumeControlIcon>
+  );
+};
+
+export default VolumeControl;

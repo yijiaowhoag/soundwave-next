@@ -1,6 +1,6 @@
 import { forwardRef, useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import useCombinedRefs from '../hooks/useCombinedRefs';
+import useCombinedRefs from '../../hooks/useCombinedRefs';
 
 interface PreviewAudioProps {
   preview_url: string;

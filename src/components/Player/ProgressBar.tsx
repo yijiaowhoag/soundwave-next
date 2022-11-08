@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { convertDurationMs } from '../utils/convertDuration';
+import { convertDurationMs } from '../../utils/convertDuration';
 
 interface ProgressBarProps {
   playerState?: Spotify.PlaybackState;
@@ -16,13 +16,13 @@ const BarContainer = styled.div`
 const Bar = styled.div<{ progress: number }>`
   width: 100%;
   height: 0.2em;
-  margin: 0 0.5em;
+  margin: 0 0.8em;
   border-radius: 0.1em;
   background: ${({ progress, theme }) =>
     `linear-gradient(
     to right,
-    ${theme.colors.lightGreen} 0%,
-    ${theme.colors.lightGreen} ${progress}%,
+    ${theme.colors.spotifyGreen} 0%,
+    ${theme.colors.spotifyGreen} ${progress}%,
     grey ${progress}%,
     grey 100%
   );`};
@@ -30,6 +30,7 @@ const Bar = styled.div<{ progress: number }>`
 
 const Info = styled.div`
   font-size: 1em;
+  opacity: 0.7;
 `;
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ playerState }) => {
