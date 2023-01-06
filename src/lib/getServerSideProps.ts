@@ -1,16 +1,13 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { GetServerSidePropsContext } from 'next';
 import { getAuthSession } from './authSession';
 
-export const getServerSideProps = async ({
-  req,
-  res,
-}: {
-  req: NextApiRequest;
-  res: NextApiResponse;
-}) => {
-  const user = await getAuthSession(req);
+export const getServerSideProps = async (
+  req: GetServerSidePropsContext['req'],
+  res: GetServerSidePropsContext['res']
+) => {
+  const session = await getAuthSession(req, res);
 
-  if (!user) {
+  if (!session) {
     return {
       redirect: {
         permanent: false,
@@ -19,5 +16,5 @@ export const getServerSideProps = async ({
     };
   }
 
-  return { props: { user } };
+  return { props: { token: session?.accessToken } };
 };

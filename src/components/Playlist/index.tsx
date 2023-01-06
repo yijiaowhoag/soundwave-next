@@ -1,30 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import {
-  usePlayMutation,
-  useAddTrackMutation,
-  useRemoveTrackMutation,
-  SessionDocument,
-  SessionQuery,
-  SessionQueryVariables,
-  AddTrackInput,
-  RemoveTrackInput,
-  TrackInQueue,
-} from '../../generated/graphql';
+import { usePlayMutation, TrackInQueue } from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
 import { usePlayer } from '../../contexts/PlayerContext';
+import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import Track from './Track';
-
-interface PlaylistProps {
-  sessionId: string;
-  queue?: TrackInQueue[];
-}
 
 const Container = styled.div`
   width: 100%;
   height: 100%;
   padding: 0;
-  overflow-y: scroll;
+  // overflow: scroll;
 
   &::-webkit-scrollbar {
     display: none;
@@ -36,14 +22,19 @@ const Container = styled.div`
   }
 `;
 
+interface PlaylistProps {
+  sessionId: string;
+  queue?: TrackInQueue[];
+}
+
 const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {
   const device = useDevice();
-  const { player, playbackState } = usePlayer();
+  const player = usePlayer();
+  const playbackState = usePlaybackState();
 
   const [selected, setSelected] = useState<string>();
 
   const [play] = usePlayMutation();
-  const [removeTrack] = useRemoveTrackMutation();
 
   const playTrack = useCallback(
     (position: string) => (e: React.MouseEvent) => {
@@ -64,67 +55,6 @@ const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {
     player.togglePlay();
   }, [player, playbackState]);
 
-  // const add = (track: AddTrackInput) => {
-  //   addTrack({
-  //     variables: { sessionId, track },
-  //     update: (cache, { data }) => {
-  //       if (!data) return;
-
-  //       const x = cache.readQuery<SessionQuery, SessionQueryVariables>({
-  //         query: SessionDocument,
-  //         variables: {
-  //           sessionId,
-  //         },
-  //       });
-
-  //       if (!x) return;
-
-  //       cache.writeQuery<SessionQuery, SessionQueryVariables>({
-  //         query: SessionDocument,
-  //         variables: { sessionId },
-  //         data: {
-  //           session: {
-  //             ...x.session,
-  //             queue: x.session.queue
-  //               ? [...x.session.queue, data.addToSession.track]
-  //               : [],
-  //           },
-  //         },
-  //       });
-  //     },
-  //   });
-  // };
-
-  // const remove = (track: RemoveTrackInput) => {
-  //   removeTrack({
-  //     variables: { sessionId, track },
-  //     update: (cache, { data }) => {
-  //       if (!data) return;
-
-  //       const x = cache.readQuery<SessionQuery, SessionQueryVariables>({
-  //         query: SessionDocument,
-  //         variables: {
-  //           sessionId,
-  //         },
-  //       });
-
-  //       if (!x) return;
-
-  //       cache.writeQuery<SessionQuery, SessionQueryVariables>({
-  //         query: SessionDocument,
-  //         variables: { sessionId },
-  //         data: {
-  //           session: {
-  //             ...x.session,
-  //             queue: x.session.queue.filter(
-  //               ({ id }) => id !== data.removeFromSession?.track.id
-  //             ),
-  //           },
-  //         },
-  //       });
-  //     },
-  //   });
-  // };
   return (
     <Container>
       <ul>
@@ -132,6 +62,7 @@ const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {
           queue.map((track) => (
             <li key={`${track.id}`} onClick={() => setSelected(track.id)}>
               <Track
+                sessionId={sessionId}
                 track={track}
                 isCurrent={
                   playbackState?.track_window.current_track.id === track.id

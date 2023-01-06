@@ -13,9 +13,10 @@ import {
   useRepeatMutation,
   TrackInQueue,
   RepeatMode,
-} from '../../generated/graphql';
+} from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
 import { usePlayer } from '../../contexts/PlayerContext';
+import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import ProgressBar from './ProgressBar';
 import VolumeControl from './Volume';
 
@@ -137,7 +138,8 @@ interface PlayerProps {
 
 const Player: React.FC<PlayerProps> = ({ queue }) => {
   const device = useDevice();
-  const { player, playbackState } = usePlayer();
+  const player = usePlayer();
+  const playbackState = usePlaybackState();
 
   const [shuffle] = useShuffleMutation();
   const [repeat] = useRepeatMutation();
@@ -169,10 +171,9 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
     repeat({
       variables: {
         deviceId: device.id,
-        state:
-          playbackState.repeat_mode === PlaybackStateRepeat.OFF
-            ? RepeatMode.Track
-            : RepeatMode.Off,
+        state: [RepeatMode.Off, RepeatMode.Context, RepeatMode.Track][
+          (playbackState.repeat_mode + 1) % 3
+        ],
       },
     });
   };

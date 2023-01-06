@@ -1,7 +1,9 @@
-import { AuthenticationError } from 'apollo-server-micro';
-import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest';
+import {
+  RESTDataSource,
+  WillSendRequestOptions,
+} from '@apollo/datasource-rest';
 import querystring from 'querystring';
-import { Context, RepeatMode } from '../types';
+import type { JWT } from '../lib/jwt';
 
 interface Paging<T> {
   items: T[];
@@ -12,19 +14,16 @@ interface Paging<T> {
 }
 
 export class SpotifyAPI extends RESTDataSource {
-  constructor() {
-    super();
-    this.baseURL = process.env.SPOTIFY_API_ENDPOINT;
+  override baseURL = process.env.SPOTIFY_API_ENDPOINT;
+  private accessToken: string;
+
+  constructor(options: { session: JWT }) {
+    super(options);
+    this.accessToken = options.session.accessToken;
   }
 
-  willSendRequest(request: RequestOptions) {
-    if (!this.context.authSession?.accessToken)
-      throw new AuthenticationError('You must be logged in with Spotify');
-
-    request.headers.set(
-      'Authorization',
-      `Bearer ${this.context.authSession.accessToken}`
-    );
+  override willSendRequest(request: WillSendRequestOptions) {
+    request.headers['authorization'] = `Bearer ${this.accessToken}`;
   }
 
   async getUserTopTracks(offset: number, limit: number): Promise<Paging<any>> {
@@ -58,10 +57,12 @@ export class SpotifyAPI extends RESTDataSource {
   }
 
   async play(deviceId: string, uris: string[], offset?: number): Promise<void> {
-    return this.put(`${this.baseURL}/me/player/play?device_id=${deviceId}`, {
-      uris,
-      offset: offset && { position: offset },
-    });
+    const body = offset ? { uris, offset: { position: offset } } : { uris };
+
+    return this.put(
+      `${this.baseURL}/me/player/play?device_id=${deviceId}`,
+      body
+    );
   }
 
   async toggleShuffle(deviceId: string, state: boolean): Promise<void> {
@@ -70,7 +71,7 @@ export class SpotifyAPI extends RESTDataSource {
     );
   }
 
-  async toggleRepeat(deviceId: string, state: RepeatMode): Promise<void> {
+  async toggleRepeat(deviceId: string, state: string): Promise<void> {
     return this.put(
       `${this.baseURL}/me/player/repeat?device_id=${deviceId}&state=${state}`
     );

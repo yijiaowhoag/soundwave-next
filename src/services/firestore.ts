@@ -10,4 +10,12 @@ if (admin.apps.length === 0) {
 
 const db = admin.firestore();
 
-export { db };
+const converter = <T>() => ({
+  toFirestore: (data: Partial<T>): FirebaseFirestore.DocumentData => data,
+  fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot<T>): T => ({
+    id: snapshot.id,
+    ...snapshot.data(),
+  }),
+});
+
+export { db, converter };

@@ -6,7 +6,17 @@ import {
   BsSuitHeart,
 } from 'react-icons/bs';
 import { RiDeleteBinLine } from 'react-icons/ri';
-import { TrackInQueue } from '../../generated/graphql';
+import {
+  useAddTrackMutation,
+  useRemoveTrackMutation,
+  SessionDocument,
+  SessionQuery,
+  SessionQueryVariables,
+  AddTrackInput,
+  RemoveTrackInput,
+  TrackInQueue,
+} from '../../__generated__/types';
+import Menu from '../shared/Menu';
 import { convertDurationMs } from '../../utils/convertDuration';
 
 const TrackContent = styled.div`
@@ -124,26 +134,89 @@ const TrackContainer = styled.div<{
 `;
 
 interface TrackProps {
+  sessionId: string;
   track: TrackInQueue;
   isCurrent: boolean;
   isPaused: boolean;
   isSelected: boolean;
   playTrack: (position: string) => React.MouseEventHandler;
   togglePlay: () => void;
-  onAdd?: (track: TrackInQueue) => void;
-  onRemove?: (track: TrackInQueue) => void;
 }
 
 const Track: React.FC<TrackProps> = ({
+  sessionId,
   track,
   isCurrent,
   isPaused,
   isSelected,
   playTrack,
   togglePlay,
-  onAdd,
-  onRemove,
 }) => {
+  const [addTrack] = useAddTrackMutation();
+  const [removeTrack] = useRemoveTrackMutation();
+
+  const add = (toSession: string, track: AddTrackInput) => {
+    addTrack({
+      variables: { sessionId: toSession, track },
+      update: (cache, { data }) => {
+        if (!data) return;
+
+        const x = cache.readQuery<SessionQuery, SessionQueryVariables>({
+          query: SessionDocument,
+          variables: {
+            sessionId,
+          },
+        });
+
+        if (!x) return;
+
+        cache.writeQuery<SessionQuery, SessionQueryVariables>({
+          query: SessionDocument,
+          variables: { sessionId },
+          data: {
+            session: {
+              ...x.session,
+              queue: x.session.queue
+                ? [...x.session.queue, data.addToSession.track]
+                : [],
+            },
+          },
+        });
+      },
+    });
+  };
+
+  const remove = (fromSession: string, track: RemoveTrackInput) => {
+    removeTrack({
+      variables: { sessionId: fromSession, track },
+      update: (cache, { data }) => {
+        if (!data) return;
+
+        const x = cache.readQuery<SessionQuery, SessionQueryVariables>({
+          query: SessionDocument,
+          variables: {
+            sessionId,
+          },
+        });
+
+        if (!x) return;
+
+        cache.writeQuery<SessionQuery, SessionQueryVariables>({
+          query: SessionDocument,
+          variables: { sessionId },
+          data: {
+            session: {
+              ...x.session,
+              queue: x.session.queue.filter(
+                ({ id }) => id !== data.removeFromSession?.track.id
+              ),
+            },
+          },
+        });
+      },
+    });
+  };
+
   return (
     <TrackContainer
       isSelected={isSelected}
@@ -184,6 +257,10 @@ const Track: React.FC<TrackProps> = ({
         </IconWrapper> */}
         <div>
           <span>{convertDurationMs(track.duration_ms)}</span>
+          <Menu
+            onAdd={(toSession: string) => add(toSession, track)}
+            onRemove={() => remove(sessionId, track)}
+          />
         </div>
       </TrackContent>
       <HoverBkg />

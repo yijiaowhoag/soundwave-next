@@ -5,24 +5,14 @@ interface SpotifyUser {
 }
 
 const createUser = async ({
-  display_name,
-  email,
   id,
-  images,
   ...rest
 }: SpotifyUser): Promise<FirebaseFirestore.DocumentData> => {
-  await db
-    .collection('users')
-    .doc(id)
-    .set({
-      display_name,
-      email,
-      images,
-      spotify_product: rest.product || null,
-    });
+  const userRef = db.collection('users').doc(id);
+  await userRef.set({ ...rest }, { merge: true });
   const userDoc = await db.collection('users').doc(id).get();
 
-  return { ...userDoc.data(), id: userDoc.id };
+  return { id: userDoc.id, ...userDoc.data() };
 };
 
 const findUser = async (

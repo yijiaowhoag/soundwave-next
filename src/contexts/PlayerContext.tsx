@@ -1,12 +1,7 @@
 import { createContext, useContext, useRef, useState, useEffect } from 'react';
-import { useSDK } from './SDKContext';
+import { useWebPlaybackSDK } from './WebPlaybackSDKContext';
 
-export const PlayerContext = createContext<{
-  player?: Spotify.Player;
-  playbackState?: Spotify.PlaybackState;
-}>({});
-
-export const usePlayer = () => useContext(PlayerContext);
+export const PlayerContext = createContext<Spotify.Player | null>(null);
 
 export const PlayerProvider: React.FC<{
   getOAuthToken: Spotify.PlayerInit['getOAuthToken'];
@@ -14,13 +9,14 @@ export const PlayerProvider: React.FC<{
   volume: Spotify.PlayerInit['volume'];
   connectOnInit?: boolean;
 }> = ({ children, getOAuthToken, name, volume, connectOnInit = true }) => {
-  const SDKReady = useSDK();
+  const SDKReady = useWebPlaybackSDK();
+
+  const [player, setPlayer] = useState<Spotify.Player | null>(null);
 
   const getOAuthTokenRef = useRef(getOAuthToken);
-  getOAuthTokenRef.current = getOAuthToken;
-
-  const [player, setPlayer] = useState<Spotify.Player>();
-  const [playbackState, setPlaybackState] = useState<Spotify.PlaybackState>();
+  useEffect(() => {
+    getOAuthTokenRef.current = getOAuthToken;
+  }, [getOAuthToken]);
 
   useEffect(() => {
     if (SDKReady) {
@@ -37,22 +33,15 @@ export const PlayerProvider: React.FC<{
     }
   }, [connectOnInit, SDKReady]);
 
-  useEffect(() => {
-    if (!player) return;
-
-    player.addListener('player_state_changed', playerStateChanged);
-
-    return () =>
-      player.removeListener('player_state_changed', playerStateChanged);
-  }, [player]);
-
-  const playerStateChanged = (state: Spotify.PlaybackState) => {
-    setPlaybackState(state);
-  };
-
   return (
-    <PlayerContext.Provider value={{ player, playbackState }}>
-      {children}
-    </PlayerContext.Provider>
+    <PlayerContext.Provider value={player}>{children}</PlayerContext.Provider>
   );
+};
+
+export const usePlayer = (): Spotify.Player | null => {
+  const value = useContext(PlayerContext);
+
+  if (value === undefined) throw new Error('PlayerContext not available');
+
+  return value;
 };

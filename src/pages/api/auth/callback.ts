@@ -1,27 +1,36 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAccessToken, getSelf } from '../../../services/auth';
-import { encryptSession } from '../../../lib/authSession';
+import { encrypt } from '../../../lib/jwt';
 import { setCookie } from '../../../lib/cookies';
 import { findOrCreateUser } from '../../../lib/user';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { access_token, refresh_token, expires_in } = await getAccessToken(
-      req.query.code
+      req.query.code ?? ''
     );
     const me = await getSelf(access_token);
 
     const user = await findOrCreateUser(me);
-
     const session = {
       accessToken: access_token,
       refreshToken: refresh_token,
-      expiresAt: Date.now() + expires_in * 1000,
-      id: user.id,
+      exp: Date.now() + expires_in * 1000,
+      user: {
+        id: user.id,
+        name: user.display_name,
+        email: user.email,
+        avatar: images.find((image) => image.height === 300) || images[0].url,
+      },
     };
 
-    const token = await encryptSession(session);
-    setCookie(res, token);
+    if (!process.env.TOKEN_SECRET) return;
+
+    const token = await encrypt({
+      payload: session,
+      secret: process.env.TOKEN_SECRET,
+    });
+    setCookie(res, { name: 'sessionToken', value: token });
 
     res.redirect('/');
   } catch (err) {

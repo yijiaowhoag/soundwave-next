@@ -6,7 +6,7 @@ export const getAccessToken = async (code: string | string[]) => {
     `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
   ).toString('base64');
 
-  return fetch(process.env.SPOTIFY_TOKEN_ENDPOINT, {
+  return fetch(process.env.SPOTIFY_TOKEN_ENDPOINT!, {
     method: 'POST',
     body: querystring.stringify({
       code,
@@ -25,7 +25,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
     `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
   ).toString('base64');
 
-  return fetch(process.env.SPOTIFY_TOKEN_ENDPOINT, {
+  return fetch(process.env.SPOTIFY_TOKEN_ENDPOINT!, {
     method: 'POST',
     body: querystring.stringify({
       grant_type: 'refresh_token',

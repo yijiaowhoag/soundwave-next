@@ -1,13 +1,23 @@
-import { NextApiRequest } from 'next';
 import Iron from '@hapi/iron';
 import { refreshAccessToken } from '../services/auth';
-import { getCookieFromServer } from './cookies';
+import { getCookieFromServer, setCookie } from './cookies';
+import type {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from 'next';
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+}
 
 export interface AuthSession {
   accessToken: string;
-  refreshToken?: string;
-  expiresAt: number;
-  id: string;
+  refreshToken: string;
+  exp: number;
+  user: User;
 }
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
@@ -15,32 +25,29 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET;
 export const encryptSession = async (session: AuthSession): Promise<string> =>
   Iron.seal(session, TOKEN_SECRET!, Iron.defaults);
 
+export const decryptSession = async (sessionToken: string) =>
+  await Iron.unseal(sessionToken, TOKEN_SECRET!, Iron.defaults);
+
 export const getAuthSession = async (
-  req: NextApiRequest
+  req: GetServerSidePropsContext['req'] | NextApiRequest,
+  res: GetServerSidePropsContext['res'] | NextApiResponse
 ): Promise<AuthSession | undefined> => {
-  let idToken = getCookieFromServer(req);
+  let sessionToken = getCookieFromServer(req, 'sessionToken');
 
-  if (!idToken) return;
+  if (!sessionToken) return;
 
-  const { accessToken, refreshToken, expiresAt, id } = await Iron.unseal(
-    idToken,
-    TOKEN_SECRET!,
-    Iron.defaults
-  );
+  const session = await decryptSession(sessionToken);
 
-  if (Date.now() > expiresAt) {
-    try {
-      const data = await refreshAccessToken(refreshToken);
+  if (Date.now() > session.exp) {
+    const { access_token, expires_in } = await refreshAccessToken(
+      session.refreshToken
+    );
+    session['accessToken'] = access_token;
+    session['exp'] = Date.now() + expires_in * 1000;
 
-      return {
-        accessToken: data.access_token,
-        expiresAt: Date.now() + data.expires_in * 1000,
-        id,
-      };
-    } catch (err) {
-      throw Error('Invalid token');
-    }
+    const token = await encryptSession(session);
+    setCookie(res, { name: 'sessionToken', value: token });
   }
 
-  return { accessToken, expiresAt, id };
+  return session;
 };

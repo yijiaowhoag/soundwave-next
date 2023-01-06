@@ -1,92 +1,75 @@
-import { GetServerSideProps } from 'next';
+import { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { getAuthSession } from '../lib/session';
-import { useCreateSessionMutation } from '../generated/graphql';
-import Layout from '../components/Layout';
-import Modal from '../components/Modal';
-import Button from '../components/Button';
-import SessionForm from '../components/SessionForm';
-import Sessions from '../components/Sessions';
-import TopArtist from '../components/TopArtists';
+import { useRecommendationsLazyQuery } from '../__generated__/types';
+import Layout from '../components/shared/Layout';
+import SearchSelect from '../components/Search/SearchSelect';
+import AudioFilters from '../components/SearchResults/AudioFilters';
+import SearchResults from '../components/SearchResults';
 
-const Main = styled.div`
+const SIDE_CONTAINER_WIDTH = '320px';
+
+const SearchBar = styled.div`
+  margin-right: ${SIDE_CONTAINER_WIDTH};
+  .Select-menu-outer {
+    z-index: 100 !important;
+  }
+`;
+
+const ResultsContainer = styled.div<{ active: boolean }>`
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex: 1;
   justify-content: space-between;
-  width: 80vw;
-  padding-top: 10vh;
-  padding-bottom: 10vh;
-  background-color: ${({ theme }) => theme.colors.darkGreen};
-`;
+  min-height: 100%;
+  transform: scale(0);
+  border-top: 2.5px solid ${({ theme }) => theme.colors.lightGreen10};
+  background: ${({ theme }) =>
+    `linear-gradient(to bottom, transparent 5%, ${theme.colors.lightGreen10} 25%, ${theme.colors.green})`};
+  overflow: auto;
 
-const ActionBar = styled.div`
-  position: absolute;
-  top: 10vh;
-  left: 0;
-  right: 2.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1rem 1rem 0;
-
-  > h2 {
-    margin: 0 0 0 4rem;
-  }
-`;
-
-const ActionButton = styled(Button)`
-  > span {
-    margin-right: 8px;
-    white-space: nowrap;
-    color: ${({ theme }) => theme.colors.darkGreen};
-  }
-
-  > img {
-    width: 20px;
-    height: 20px;
-  }
+  ${({ active }) =>
+    active &&
+    `transform: scale(1); transform-origin: bottom; transition: transform 0.8s ease-in`}
 `;
 
 const Index = () => {
-  const [createSession] = useCreateSessionMutation();
+  const initialRender = useRef(true);
+  const boundingBoxRef = useRef<HTMLDivElement>(null);
+  const [seeds, setSeeds] = useState<string[]>([]);
+  const [filters, setFilters] = useState({});
+
+  const [recommend, { data, loading }] = useRecommendationsLazyQuery();
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+    } else {
+      recommend({ variables: { seeds, filters } });
+    }
+  }, [seeds, filters]);
+
+  useEffect(() => {
+    recommend({ variables: { seeds, filters } });
+  }, [seeds, filters]);
 
   return (
     <Layout>
-      <Main>
-        <ActionBar>
-          <h2>My Sessions</h2>
-          <Modal
-            activator={({ setOpen }) => (
-              <ActionButton onClick={() => setOpen(true)}>
-                <span>New</span>
-                <img src="/plus.svg" alt="Plus Icon" />
-              </ActionButton>
-            )}
-          >
-            <SessionForm onSubmit={createSession} />
-          </Modal>
-        </ActionBar>
-        <Sessions />
-        <TopArtist />
-      </Main>
+      <div ref={boundingBoxRef} style={{ height: '100vh', overflow: 'scroll' }}>
+        <SearchBar>
+          <SearchSelect
+            seeds={seeds}
+            onUpdateSeeds={(updated) => setSeeds(updated)}
+          />
+        </SearchBar>
+        <ResultsContainer active={!!data?.recommendations}>
+          <SearchResults tracks={data?.recommendations} ref={boundingBoxRef} />
+          <AudioFilters
+            onChange={(filter) => setFilters({ ...filters, ...filter })}
+          />
+        </ResultsContainer>
+      </div>
     </Layout>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const user = await getAuthSession(req);
-
-  if (!user) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: '/login',
-      },
-    };
-  }
-
-  return { props: {} };
 };
 
 export default Index;

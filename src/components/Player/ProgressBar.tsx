@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { convertDurationMs } from '../../utils/convertDuration';
 
 interface ProgressBarProps {
-  playerState?: Spotify.PlaybackState;
+  playerState: Spotify.PlaybackState | null;
 }
 
 const BarContainer = styled.div`

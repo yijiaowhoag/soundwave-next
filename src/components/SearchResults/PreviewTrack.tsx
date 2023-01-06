@@ -1,15 +1,10 @@
 import { createRef, forwardRef, useState } from 'react';
 import styled from 'styled-components';
-import {
-  BsPlayFill,
-  BsPauseFill,
-  BsSuitHeartFill,
-  BsSuitHeart,
-} from 'react-icons/bs';
-import { useAddTrackMutation, Track } from '../../generated/graphql';
+import { BsPlayFill, BsPauseFill } from 'react-icons/bs';
+import { useAddTrackMutation, Track } from '../../__generated__/types';
 import { convertDurationMs } from '../../utils/convertDuration';
 import PreviewAudio from './PreviewAudio';
-import Menu from '../Menu';
+import Menu from '../shared/Menu';
 
 const TrackImageContainer = styled.div`
   position: relative;
@@ -196,7 +191,6 @@ const PreviewTrack: React.FC<PreviewTrackProps> = forwardRef(
             )}
             <span>{convertDurationMs(track.duration_ms)}</span>
             <Menu
-              ref={ref}
               onAdd={(sessionId) =>
                 addTrack({ variables: { sessionId, track } })
               }

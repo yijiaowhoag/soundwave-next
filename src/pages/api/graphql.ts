@@ -1,43 +1,67 @@
 import 'reflect-metadata';
-import { ApolloServer } from 'apollo-server-micro';
-import { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path';
-import { buildSchema } from 'type-graphql';
-
-import { SessionResolver } from '../../resolvers/session';
-import { SpotifyResolver } from '../../resolvers/spotify';
+import { ApolloServer, BaseContext, ContextFunction } from '@apollo/server';
+import { startServerAndCreateNextHandler } from '@as-integrations/next';
+import { GraphQLError } from 'graphql';
+import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
+import { schema } from '../../apollo/schema';
 import { SpotifyAPI } from '../../services/spotify-api';
+import { encrypt, decrypt, JWT } from '../../lib/jwt';
+import { refreshAccessToken } from '../../services/auth';
+import { setCookie } from '../../lib/cookies';
 
-let apolloHandler: ReturnType<typeof ApolloServer.prototype.createHandler>;
-const createApolloHandler = async () => {
-  const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      //  resolvers: [path.join(__dirname, '../resolvers/*.{ts,js}')],
-      resolvers: [SessionResolver, SpotifyResolver],
-      validate: false,
-    }),
-    context: ({ req }: { req: Request }) => ({
-      req,
-    }),
-    dataSources: () => {
-      return { spotifyAPI: new SpotifyAPI() };
-    },
+interface Context extends BaseContext {
+  session?: JWT;
+  dataSources: {
+    spotifyAPI: SpotifyAPI;
+  };
+}
+
+const createApolloContext: ContextFunction<
+  Parameters<NextApiHandler>,
+  Context
+> = async (req, res) => {
+  const { sessionToken } = req.cookies;
+
+  const session = await decrypt({
+    token: sessionToken,
+    secret: process.env.TOKEN_SECRET!,
   });
 
-  await apolloServer.start();
-  apolloHandler = apolloServer.createHandler({ path: '/api/graphql' });
+  if (!session) {
+    throw new GraphQLError('User is not authenticated', {
+      extensions: {
+        code: 'UNAUTHENTICATED',
+        http: { status: 401 },
+      },
+    });
+  }
 
-  return apolloHandler;
+  if (Date.now() > session.exp) {
+    const { access_token, expires_in } = await refreshAccessToken(
+      session.refreshToken
+    );
+    session['accessToken'] = access_token;
+    session['exp'] = Date.now() + expires_in * 1000;
+
+    const token = await encrypt({
+      payload: session,
+      secret: process.env.TOKEN_SECRET,
+    });
+    setCookie(res, { name: 'sessionToken', value: token });
+  }
+
+  return {
+    session,
+    dataSources: {
+      spotifyAPI: new SpotifyAPI({ session }),
+    },
+  };
 };
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+const apolloServer = new ApolloServer<Context>({
+  schema,
+});
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const apolloHandler = await createApolloHandler();
-
-  return apolloHandler(req, res);
-};
+export default startServerAndCreateNextHandler<Context>(apolloServer, {
+  context: createApolloContext,
+});

@@ -1,11 +1,10 @@
 import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import { BsPlayCircleFill } from 'react-icons/bs';
-import { useSessionQuery, usePlayMutation } from '../../generated/graphql';
+import { useSessionQuery, usePlayMutation } from '../../__generated__/types';
 import { getServerSideProps as serverProps } from '../../lib/getServerSideProps';
-import { AuthSession } from '../../lib/authSession';
 import { useDevice } from '../../contexts/DeviceContext';
-import Layout from '../../components/Layout';
+import Layout from '../../components/shared/Layout';
 import Playlist from '../../components/Playlist';
 import Player from '../../components/Player';
 
@@ -49,7 +48,7 @@ const SessionHead = styled.div`
   margin: 0.5rem 0;
 `;
 
-const PlayIconWrapper = styled.div`
+const PlayIconWrapper = styled.div<{ enabled: boolean }>`
   width: 55px;
   height: 55px;
   border-radius: 100%;
@@ -60,7 +59,8 @@ const PlayIconWrapper = styled.div`
   .play-icon {
     width: 100%;
     height: 100%;
-    fill: ${({ theme }) => theme.colors.spotifyGreen};
+    fill: ${({ enabled, theme }) =>
+      enabled ? theme.colors.spotifyGreen : theme.colors.disabled};
     cursor: pointer;
   }
 `;
@@ -70,19 +70,25 @@ const PlayerContainer = styled.div`
   border-left: 1.5px solid ${({ theme }) => theme.colors.green};
 `;
 
-const Session: React.FC<{ sessionId: string; user: AuthSession }> = ({
-  sessionId,
-}) => {
+const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
   const device = useDevice();
 
   const { data, loading } = useSessionQuery({ variables: { sessionId } });
   const [play] = usePlayMutation();
 
+  const uris = data?.session.queue.map((track) => track.uri);
+  const playSession = () => {
+    if (!device || !uris || uris.length === 0) return;
+
+    play({
+      variables: { deviceId: device.id, uris },
+    });
+  };
+
   if (loading) return <p>Loading...</p>;
 
   if (!data?.session) return null;
 
-  const uris = data.session.queue.map((track) => track.uri);
   return (
     <Layout>
       {data?.session && (
@@ -90,25 +96,14 @@ const Session: React.FC<{ sessionId: string; user: AuthSession }> = ({
           <SessionInfo>
             <SessionHead>
               <h1>{data.session.name}</h1>
-              <PlayIconWrapper>
-                {device ? (
-                  <BsPlayCircleFill
-                    onClick={() =>
-                      play({
-                        variables: { deviceId: device.id, uris },
-                      })
-                    }
-                    className="play-icon"
-                  />
-                ) : (
-                  <div />
-                )}
+              <PlayIconWrapper enabled={!!device}>
+                <BsPlayCircleFill onClick={playSession} className="play-icon" />
               </PlayIconWrapper>
             </SessionHead>
             <p>{data.session.description || ''}</p>
           </SessionInfo>
-          <div>
-            <Playlist queue={data.session.queue} />
+          <div style={{ width: '100%' }}>
+            <Playlist queue={data.session.queue} sessionId={sessionId} />
             <PlayerContainer>
               <Player queue={data.session.queue} />
             </PlayerContainer>
@@ -120,14 +115,20 @@ const Session: React.FC<{ sessionId: string; user: AuthSession }> = ({
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { props } = await serverProps(context);
-
   return {
-    props: {
-      ...props,
-      ...{ sessionId: context.params?.id },
-    },
+    props: { sessionId: context.params?.id },
   };
 };
+
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const { props } = await serverProps(context.req, context.res);
+
+//   return {
+//     props: {
+//       ...props,
+//       ...{ sessionId: context.params?.id },
+//     },
+//   };
+// };
 
 export default Session;
