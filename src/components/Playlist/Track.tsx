@@ -164,7 +164,7 @@ const Track: React.FC<TrackProps> = ({
         const x = cache.readQuery<SessionQuery, SessionQueryVariables>({
           query: SessionDocument,
           variables: {
-            sessionId,
+            sessionId: toSession,
           },
         });
 
@@ -172,7 +172,7 @@ const Track: React.FC<TrackProps> = ({
 
         cache.writeQuery<SessionQuery, SessionQueryVariables>({
           query: SessionDocument,
-          variables: { sessionId },
+          variables: { sessionId: toSession },
           data: {
             session: {
               ...x.session,
