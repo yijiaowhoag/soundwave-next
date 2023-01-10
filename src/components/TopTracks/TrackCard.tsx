@@ -44,7 +44,9 @@ const Info = styled.div`
 const TrackCard: React.FC<TrackCardProps> = ({ track }) => (
   <Card>
     <ImageOverlay />
-    <Image src={track.images.find((image) => image.height === 300)?.url} />
+    <Image
+      src={track.album.images.find((image) => image.height === 300)?.url}
+    />
     <Info>
       <span>{track.name}</span>
       <span>

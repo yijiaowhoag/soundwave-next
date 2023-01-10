@@ -170,16 +170,17 @@ const PreviewTrack: React.FC<PreviewTrackProps> = forwardRef(
             </PlayIconWrapper>
           )}
           <TrackImage
-            src={track.images.find((image) => image.height === 300)?.url}
+            src={track.album.images.find((image) => image.height === 300)?.url}
           />
         </TrackImageContainer>
         <TrackContent>
           <div>
             <TrackName>{track.name}</TrackName>
             <TrackArtists>
-              {track.artists
-                .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
-                .join(', ')}
+              {track.artists &&
+                track.artists
+                  .reduce((acc, curr) => [...acc, curr.name], [])
+                  .join(', ')}
             </TrackArtists>
           </div>
           <div>

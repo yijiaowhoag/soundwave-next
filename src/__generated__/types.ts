@@ -26,10 +26,31 @@ export type AddTrackInput = {
   uri: Scalars['String'];
 };
 
+export type Album = {
+  __typename?: 'Album';
+  id: Scalars['ID'];
+  images: Array<Image>;
+  name: Scalars['String'];
+  release_date: Scalars['String'];
+};
+
 export type Artist = IArtist & {
   __typename?: 'Artist';
+  genres: Array<Scalars['String']>;
   id: Scalars['ID'];
+  images: Array<Image>;
   name: Scalars['String'];
+  uri: Scalars['String'];
+};
+
+export type ArtistDetails = IArtist & {
+  __typename?: 'ArtistDetails';
+  genres: Array<Scalars['String']>;
+  id: Scalars['ID'];
+  images: Array<Image>;
+  name: Scalars['String'];
+  relatedArtists: Array<Artist>;
+  topTracks: Array<Track>;
   uri: Scalars['String'];
 };
 
@@ -59,17 +80,10 @@ export type AudioFiltersInput = {
   target_valence?: InputMaybe<Scalars['Float']>;
 };
 
-export type FavoriteArtist = IArtist & {
-  __typename?: 'FavoriteArtist';
+export type IArtist = {
   genres: Array<Scalars['String']>;
   id: Scalars['ID'];
   images: Array<Image>;
-  name: Scalars['String'];
-  uri: Scalars['String'];
-};
-
-export type IArtist = {
-  id: Scalars['ID'];
   name: Scalars['String'];
   uri: Scalars['String'];
 };
@@ -154,13 +168,20 @@ export type MutationUnfavoriteTrackArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  artistDetails: ArtistDetails;
   me?: Maybe<User>;
   recommendations: Array<Track>;
   search: Array<Track>;
   session: Session;
   sessions: Array<Session>;
-  userTopArtists: Array<FavoriteArtist>;
+  userTopArtists: Array<Artist>;
   userTopTracks: Array<Track>;
+};
+
+
+export type QueryArtistDetailsArgs = {
+  artistId: Scalars['String'];
+  market: Scalars['String'];
 };
 
 
@@ -224,11 +245,12 @@ export enum Subscription {
 
 export type Track = {
   __typename?: 'Track';
+  album: Album;
   artists: Array<Artist>;
   duration_ms: Scalars['Int'];
   id: Scalars['ID'];
-  images: Array<Image>;
   name: Scalars['String'];
+  popularity: Scalars['Int'];
   preview_url?: Maybe<Scalars['String']>;
   uri: Scalars['String'];
 };
@@ -314,6 +336,14 @@ export type ShuffleMutationVariables = Exact<{
 
 export type ShuffleMutation = { __typename?: 'Mutation', shuffle: boolean };
 
+export type ArtistQueryVariables = Exact<{
+  artistId: Scalars['String'];
+  market: Scalars['String'];
+}>;
+
+
+export type ArtistQuery = { __typename?: 'Query', artistDetails: { __typename?: 'ArtistDetails', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }>, topTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, popularity: number, preview_url?: string | null, uri: string, album: { __typename?: 'Album', id: string, name: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> } }>, relatedArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -325,14 +355,14 @@ export type RecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, preview_url?: string | null, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
+export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, popularity: number, duration_ms: number, uri: string, preview_url?: string | null, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
 
 export type SearchQueryVariables = Exact<{
   searchTerm: Scalars['String'];
 }>;
 
 
-export type SearchQuery = { __typename?: 'Query', search: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, artists: Array<{ __typename?: 'Artist', name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
+export type SearchQuery = { __typename?: 'Query', search: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', name: string }> }> };
 
 export type SessionQueryVariables = Exact<{
   sessionId: Scalars['String'];
@@ -352,7 +382,7 @@ export type UserTopArtistsQueryVariables = Exact<{
 }>;
 
 
-export type UserTopArtistsQuery = { __typename?: 'Query', userTopArtists: Array<{ __typename?: 'FavoriteArtist', id: string, name: string, uri: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
+export type UserTopArtistsQuery = { __typename?: 'Query', userTopArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, uri: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
 
 export type UserTopTracksQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']>;
@@ -360,7 +390,7 @@ export type UserTopTracksQueryVariables = Exact<{
 }>;
 
 
-export type UserTopTracksQuery = { __typename?: 'Query', userTopTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
+export type UserTopTracksQuery = { __typename?: 'Query', userTopTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
 
 
 export const AddTrackDocument = gql`
@@ -608,6 +638,76 @@ export function useShuffleMutation(baseOptions?: Apollo.MutationHookOptions<Shuf
 export type ShuffleMutationHookResult = ReturnType<typeof useShuffleMutation>;
 export type ShuffleMutationResult = Apollo.MutationResult<ShuffleMutation>;
 export type ShuffleMutationOptions = Apollo.BaseMutationOptions<ShuffleMutation, ShuffleMutationVariables>;
+export const ArtistDocument = gql`
+    query Artist($artistId: String!, $market: String!) {
+  artistDetails(artistId: $artistId, market: $market) {
+    id
+    name
+    genres
+    images {
+      url
+      width
+      height
+    }
+    topTracks {
+      id
+      name
+      album {
+        id
+        name
+        images {
+          url
+          width
+          height
+        }
+      }
+      duration_ms
+      popularity
+      preview_url
+      uri
+    }
+    relatedArtists {
+      id
+      name
+      genres
+      images {
+        url
+        width
+        height
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useArtistQuery__
+ *
+ * To run a query within a React component, call `useArtistQuery` and pass it any options that fit your needs.
+ * When your component renders, `useArtistQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useArtistQuery({
+ *   variables: {
+ *      artistId: // value for 'artistId'
+ *      market: // value for 'market'
+ *   },
+ * });
+ */
+export function useArtistQuery(baseOptions: Apollo.QueryHookOptions<ArtistQuery, ArtistQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ArtistQuery, ArtistQueryVariables>(ArtistDocument, options);
+      }
+export function useArtistLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ArtistQuery, ArtistQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ArtistQuery, ArtistQueryVariables>(ArtistDocument, options);
+        }
+export type ArtistQueryHookResult = ReturnType<typeof useArtistQuery>;
+export type ArtistLazyQueryHookResult = ReturnType<typeof useArtistLazyQuery>;
+export type ArtistQueryResult = Apollo.QueryResult<ArtistQuery, ArtistQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -654,15 +754,18 @@ export const RecommendationsDocument = gql`
   recommendations(seeds: $seeds, filters: $filters) {
     id
     name
+    album {
+      images {
+        url
+        width
+        height
+      }
+    }
     artists {
       id
       name
     }
-    images {
-      url
-      width
-      height
-    }
+    popularity
     duration_ms
     uri
     preview_url
@@ -703,13 +806,15 @@ export const SearchDocument = gql`
   search(query: $searchTerm) {
     id
     name
+    album {
+      images {
+        url
+        width
+        height
+      }
+    }
     artists {
       name
-    }
-    images {
-      url
-      width
-      height
     }
     duration_ms
     uri
@@ -837,13 +942,13 @@ export const UserTopArtistsDocument = gql`
   userTopArtists(offset: $offset, limit: $limit) {
     id
     name
-    uri
     genres
     images {
       url
       width
       height
     }
+    uri
   }
 }
     `;
@@ -881,14 +986,16 @@ export const UserTopTracksDocument = gql`
   userTopTracks(offset: $offset, limit: $limit) {
     id
     name
+    album {
+      images {
+        url
+        width
+        height
+      }
+    }
     artists {
       id
       name
-    }
-    images {
-      url
-      width
-      height
     }
     duration_ms
     uri

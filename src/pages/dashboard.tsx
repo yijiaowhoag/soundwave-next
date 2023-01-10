@@ -1,15 +1,12 @@
 import styled from 'styled-components';
 import { FaPlus } from 'react-icons/fa';
-import { getServerSideProps } from '../lib/getServerSideProps';
 import Layout from '../components/shared/Layout';
 import Modal from '../components/shared/Modal';
 import { OutlineButton } from '../components/shared/Button';
 import SessionForm from '../components/SessionForm';
 import Sessions from '../components/Sessions';
 import TopTracks from '../components/TopTracks';
-import TopArtist from '../components/TopArtists';
-
-interface DashboardProps {}
+import TopArtists from '../components/Artists';
 
 const Main = styled.div`
   position: relative;
@@ -45,7 +42,7 @@ const ActionButton = styled(OutlineButton)`
   }
 `;
 
-const Dashboard: React.FC<DashboardProps> = ({}) => (
+const Dashboard: React.FC = () => (
   <Layout>
     <Main>
       <ActionBar>
@@ -63,7 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => (
       </ActionBar>
       <Sessions />
       <TopTracks />
-      <TopArtist />
+      <TopArtists />
     </Main>
   </Layout>
 );

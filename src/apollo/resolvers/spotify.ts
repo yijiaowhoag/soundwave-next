@@ -2,7 +2,6 @@ import {
   Resolver,
   Query,
   Mutation,
-  UseMiddleware,
   Arg,
   Ctx,
   InputType,
@@ -12,23 +11,8 @@ import {
   registerEnumType,
 } from 'type-graphql';
 import { Track } from '../entities/Track';
-import { Artist, FavoriteArtist } from '../entities/Artist';
-// import { isAuth } from '../middleware/isAuth';
+import { Artist, ArtistDetails } from '../entities/Artist';
 import { RepeatMode, type Context } from '../../types';
-
-interface TrackArtistObject {
-  external_urls: object;
-  href: string;
-  id: string;
-  name: string;
-  type: string;
-  uri: string;
-}
-
-interface ArtistObject extends TrackArtistObject {
-  genres: string[];
-  images: ImageObject[];
-}
 
 interface ImageObject {
   height: number;
@@ -95,53 +79,9 @@ export class AudioFiltersInput {
   target_valence: number;
 }
 
-const artistReducer = (artist: ArtistObject) => {
-  return {
-    id: artist.id,
-    name: artist.name,
-    genres: artist.genres,
-    images: artist.images,
-    uri: artist.uri,
-  };
-};
-
-const trackArtistReducer = (trackArtist: TrackArtistObject) => {
-  return {
-    id: trackArtist.id,
-    name: trackArtist.name,
-    uri: trackArtist.uri,
-  };
-};
-
-const trackReducer = (track: any) => {
-  return {
-    id: track.id,
-    name: track.name,
-    artists:
-      track.artists && track.artists.length > 0
-        ? track.artists.reduce(
-            (acc: TrackArtistObject[], trackArtist: TrackArtistObject) => [
-              ...acc,
-              trackArtistReducer(trackArtist),
-            ],
-            []
-          )
-        : [],
-    images: track.album.images.map((image: any) => ({
-      width: image.width,
-      height: image.height,
-      url: image.url,
-    })),
-    duration_ms: track.duration_ms,
-    uri: track.uri,
-    preview_url: track.preview_url,
-  };
-};
-
 @Resolver()
 export class SpotifyResolver {
   @Query(() => [Track])
-  // @UseMiddleware(isAuth)
   async userTopTracks(
     @Arg('offset', () => Int, { nullable: true }) offset: number,
     @Arg('limit', () => Int, { nullable: true }) limit: number,
@@ -158,13 +98,12 @@ export class SpotifyResolver {
     return items;
   }
 
-  @Query(() => [FavoriteArtist])
-  // @UseMiddleware(isAuth)
+  @Query(() => [Artist])
   async userTopArtists(
     @Arg('offset', () => Int, { nullable: true }) offset: number,
     @Arg('limit', () => Int, { nullable: true }) limit: number,
     @Ctx() { dataSources }: Context
-  ): Promise<FavoriteArtist[]> {
+  ): Promise<Artist[]> {
     const response = await dataSources.spotifyAPI.getUserTopArtists(
       offset,
       limit
@@ -177,8 +116,29 @@ export class SpotifyResolver {
     return items;
   }
 
+  @Query(() => ArtistDetails)
+  async artistDetails(
+    @Arg('artistId', () => String) artistId: string,
+    @Arg('market', () => String) market: string,
+    @Ctx() { dataSources }: Context
+  ): Promise<ArtistDetails> {
+    const artist = await dataSources.spotifyAPI.getArtist(artistId);
+    const { tracks } = await dataSources.spotifyAPI.getArtistTopTracks(
+      artistId,
+      market
+    );
+    const { artists } = await dataSources.spotifyAPI.getRelatedArtists(
+      artistId
+    );
+
+    return {
+      ...artistReducer(artist),
+      topTracks: tracks.map(trackReducer),
+      relatedArtists: artists.map(artistReducer),
+    };
+  }
+
   @Query(() => [Track])
-  // @UseMiddleware(isAuth)
   async recommendations(
     @Arg('seeds', () => [String!], { nullable: true }) seeds: string[] | null,
     @Arg('filters', () => AudioFiltersInput, { nullable: true })
@@ -199,7 +159,6 @@ export class SpotifyResolver {
   }
 
   @Query(() => [Track])
-  // @UseMiddleware(isAuth)
   async search(
     @Arg('query') query: string,
     @Ctx() { dataSources }: Context
@@ -213,7 +172,6 @@ export class SpotifyResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
   async play(
     @Arg('deviceId', () => String) deviceId: string,
     @Arg('uris', () => [String!]) uris: string[],
@@ -231,7 +189,6 @@ export class SpotifyResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
   async shuffle(
     @Arg('deviceId', () => String) deviceId: string,
     @Arg('state', () => Boolean) state: boolean,
@@ -251,7 +208,6 @@ export class SpotifyResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
   async repeat(
     @Arg('deviceId', () => String) deviceId: string,
     @Arg('state', () => RepeatMode) state: RepeatMode,
@@ -265,4 +221,45 @@ export class SpotifyResolver {
 
     return true;
   }
+}
+
+function artistReducer(artist) {
+  return {
+    id: artist.id,
+    name: artist.name,
+    genres: artist.genres,
+    images: artist.images,
+    uri: artist.uri,
+  };
+}
+
+function trackReducer(track) {
+  return {
+    id: track.id,
+    name: track.name,
+    album: {
+      id: track.album.id,
+      name: track.album.name,
+      release_date: track.album.release_date,
+      images: track.album.images.map((image: ImageObject) => ({
+        width: image.width,
+        height: image.height,
+        url: image.url,
+      })),
+    },
+    artists:
+      track.artists && track.artists.length > 0
+        ? track.artists.reduce(
+            (acc: Artist[], trackArtist: Artist) => [
+              ...acc,
+              artistReducer(trackArtist),
+            ],
+            []
+          )
+        : [],
+    duration_ms: track.duration_ms,
+    popularity: track.popularity,
+    uri: track.uri,
+    preview_url: track.preview_url,
+  };
 }

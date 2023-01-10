@@ -2,7 +2,6 @@ import {
   Resolver,
   Query,
   Mutation,
-  UseMiddleware,
   Arg,
   Ctx,
   InputType,
@@ -13,18 +12,17 @@ import {
 } from 'type-graphql';
 import admin from 'firebase-admin';
 import { Session } from '../entities/Session';
-import { TrackInQueue, ArtistInQueue } from '../entities/Queue';
+import { TrackInQueue } from '../entities/Queue';
 import { db, converter } from '../../services/firestore';
-import { isAuth } from '../middleware/isAuth';
 import type { Context } from '../../types';
 
 @InputType()
-export class ArtistInput implements ArtistInQueue {
+export class ArtistInput {
   @Field(() => ID)
-  id!: string;
+  id: string;
 
   @Field()
-  name!: string;
+  name: string;
 }
 
 @InputType()
@@ -42,10 +40,10 @@ export class ImageInput {
 @InputType()
 export class TrackInput {
   @Field(() => ID)
-  id!: string;
+  id: string;
 
   @Field()
-  name!: string;
+  name: string;
 
   @Field(() => [ArtistInput])
   artists: ArtistInput[];
@@ -90,7 +88,6 @@ export class TrackResponse {
 @Resolver(Session)
 export class SessionResolver {
   @Query(() => [Session])
-  // @UseMiddleware(isAuth)
   async sessions(@Ctx() ctx: Context): Promise<Session[]> {
     const sessionsRef = db
       .collection('sessions')
@@ -111,7 +108,6 @@ export class SessionResolver {
   }
 
   @Query(() => Session)
-  // @UseMiddleware(isAuth)
   async session(@Arg('sessionId') sessionId: string): Promise<Session> {
     const sessionRef = db
       .collection('sessions')
@@ -138,7 +134,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
   async createSession(
     @Arg('name') name: string,
     @Arg('description', { nullable: true }) description: string,
@@ -159,7 +154,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(isAuth)
   async deleteSession(@Arg('sessionId') sessionId: string): Promise<boolean> {
     await db.collection('sessions').doc(sessionId).delete();
 
@@ -167,7 +161,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => TrackResponse)
-  // @UseMiddleware(isAuth)
   async addToSession(
     @Arg('sessionId') sessionId: string,
     @Arg('track') track: AddTrackInput
@@ -195,7 +188,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => TrackResponse)
-  // @UseMiddleware(isAuth)
   async removeFromSession(
     @Arg('sessionId') sessionId: string,
     @Arg('track') track: RemoveTrackInput
@@ -218,7 +210,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => ID)
-  // @UseMiddleware(isAuth)
   async favoriteTrack(
     @Arg('track') track: AddTrackInput,
     @Ctx() ctx: Context
@@ -244,7 +235,6 @@ export class SessionResolver {
   }
 
   @Mutation(() => ID)
-  // @UseMiddleware(isAuth)
   async unfavoriteTrack(
     @Arg('track') track: RemoveTrackInput,
     @Ctx() ctx: Context

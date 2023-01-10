@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styled from 'styled-components';
 import { useUserTopArtistsQuery } from '../../__generated__/types';
 
@@ -61,14 +62,16 @@ const TopArtists: React.FC = () => {
       <ul>
         {data.userTopArtists.map((artist) => (
           <li key={artist.id}>
-            <ArtistCard>
-              <ArtistImage
-                imageSrc={
-                  artist.images.filter((image) => image.height < 640)[0].url
-                }
-              />
-              <ArtistName>{artist.name}</ArtistName>
-            </ArtistCard>
+            <Link href={`/artists/${artist.id}`}>
+              <ArtistCard>
+                <ArtistImage
+                  imageSrc={
+                    artist.images.filter((image) => image.height < 640)[0].url
+                  }
+                />
+                <ArtistName>{artist.name}</ArtistName>
+              </ArtistCard>
+            </Link>
           </li>
         ))}
       </ul>

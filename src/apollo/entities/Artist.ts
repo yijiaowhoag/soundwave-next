@@ -1,4 +1,5 @@
 import { InterfaceType, Field, ObjectType, ID } from 'type-graphql';
+import { Track } from './Track';
 import { Image } from './Image';
 
 @InterfaceType()
@@ -9,6 +10,12 @@ abstract class IArtist {
   @Field()
   name: string;
 
+  @Field(() => [String])
+  genres: string[];
+
+  @Field(() => [Image])
+  images: Image[];
+
   @Field()
   uri: string;
 }
@@ -17,14 +24,16 @@ abstract class IArtist {
 export class Artist implements IArtist {
   id: string;
   name: string;
+  genres: string[];
+  images: Image[];
   uri: string;
 }
 
 @ObjectType({ implements: IArtist })
-export class FavoriteArtist extends Artist {
-  @Field(() => [String])
-  genres: string[];
+export class ArtistDetails extends Artist {
+  @Field(() => [Track])
+  topTracks: Track[];
 
-  @Field(() => [Image])
-  images: Image[];
+  @Field(() => [Artist])
+  relatedArtists: Artist[];
 }

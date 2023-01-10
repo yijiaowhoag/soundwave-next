@@ -265,7 +265,8 @@ const Search: React.FC<SearchSelectProps> = ({ seeds, onUpdateSeeds }) => {
               artist: d.artists
                 .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
                 .join(', '),
-              imageUrl: d.images.find((image) => image.height === 300)?.url,
+              imageUrl: d.album.images.find((image) => image.height === 300)
+                ?.url,
             }))
           : []
       );

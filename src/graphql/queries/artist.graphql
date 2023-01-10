@@ -1,0 +1,39 @@
+query Artist($artistId: String!, $market: String!) {
+  artistDetails(artistId: $artistId, market: $market) {
+    id
+    name
+    genres
+    images {
+      url
+      width
+      height
+    }
+    topTracks {
+      id
+      name
+      album {
+        id
+        name
+        images {
+          url
+          width
+          height
+        }
+      }
+      duration_ms
+      popularity
+      preview_url
+      uri
+    }
+    relatedArtists {
+      id
+      name
+      genres
+      images {
+        url
+        width
+        height
+      }
+    }
+  }
+}

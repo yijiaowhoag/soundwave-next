@@ -3,15 +3,6 @@ import { Artist } from './Artist';
 import { Image } from './Image';
 
 @ObjectType()
-export class ArtistInQueue {
-  @Field(() => ID)
-  id!: string;
-
-  @Field()
-  name!: string;
-}
-
-@ObjectType()
 export class TrackInQueue {
   @Field(() => ID)
   id: string;
@@ -20,7 +11,7 @@ export class TrackInQueue {
   name: string;
 
   @Field(() => [Artist])
-  artists: ArtistInQueue[];
+  artists: Artist[];
 
   @Field(() => [Image])
   images: Image[];

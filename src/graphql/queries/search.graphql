@@ -2,13 +2,15 @@ query Search($searchTerm: String!) {
   search(query: $searchTerm) {
     id
     name
+    album {
+      images {
+        url
+        width
+        height
+      }
+    }
     artists {
       name
-    }
-    images {
-      url
-      width
-      height
     }
     duration_ms
     uri

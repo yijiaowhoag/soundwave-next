@@ -2,14 +2,18 @@ query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
   recommendations(seeds: $seeds, filters: $filters) {
     id
     name
+    album {
+      images {
+        url
+        width
+        height
+      }
+    }
     artists {
+      id
       name
     }
-    images {
-      url
-      width
-      height
-    }
+    popularity
     duration_ms
     uri
     preview_url

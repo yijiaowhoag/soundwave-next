@@ -38,6 +38,20 @@ export class SpotifyAPI extends RESTDataSource {
     );
   }
 
+  async getArtist(id: string): Promise<any> {
+    return this.get(`${this.baseURL}/artists/${id}`);
+  }
+
+  async getArtistTopTracks(id: string, market: string): Promise<any> {
+    return this.get(
+      `${this.baseURL}/artists/${id}/top-tracks?market=${market}`
+    );
+  }
+
+  async getRelatedArtists(id: string): Promise<any> {
+    return this.get(`${this.baseURL}/artists/${id}/related-artists`);
+  }
+
   async search(query: string, type?: string): Promise<any> {
     const qs = querystring.stringify({ query, type: type || 'track' });
 
