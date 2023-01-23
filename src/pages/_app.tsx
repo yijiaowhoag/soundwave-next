@@ -5,7 +5,7 @@ import { useApollo } from '../apollo/client';
 import { ThemeProvider } from 'styled-components';
 import theme from '../theme';
 import { AuthProvider } from '../contexts/AuthContext';
-import { SpotifyClientProvider } from '../contexts/SpotifyClientContext';
+import { WebPlaybackSDKProvider } from '../contexts/WebPlaybackSDKContext';
 
 function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps);
@@ -14,9 +14,9 @@ function App({ Component, pageProps }: AppProps) {
     <ApolloProvider client={apolloClient}>
       <ThemeProvider theme={theme}>
         <AuthProvider>
-          <SpotifyClientProvider>
+          <WebPlaybackSDKProvider>
             <Component {...pageProps} />
-          </SpotifyClientProvider>
+          </WebPlaybackSDKProvider>
         </AuthProvider>
       </ThemeProvider>
     </ApolloProvider>

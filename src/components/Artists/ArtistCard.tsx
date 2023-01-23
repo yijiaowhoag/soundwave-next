@@ -80,7 +80,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => (
         <h4>{artist.name}</h4>
         <div>
           {artist.genres.slice(0, 2).map((genre) => (
-            <span>{genre}</span>
+            <span key={genre}>{genre}</span>
           ))}
         </div>
       </Info>

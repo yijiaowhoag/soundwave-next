@@ -73,10 +73,9 @@ export class SpotifyAPI extends RESTDataSource {
   async play(deviceId: string, uris: string[], offset?: number): Promise<void> {
     const body = offset ? { uris, offset: { position: offset } } : { uris };
 
-    return this.put(
-      `${this.baseURL}/me/player/play?device_id=${deviceId}`,
-      body
-    );
+    return this.put(`${this.baseURL}/me/player/play?device_id=${deviceId}`, {
+      body,
+    });
   }
 
   async toggleShuffle(deviceId: string, state: boolean): Promise<void> {

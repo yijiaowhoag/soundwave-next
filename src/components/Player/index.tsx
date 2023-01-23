@@ -8,7 +8,6 @@ import {
   BsArrowRepeat,
 } from 'react-icons/bs';
 import {
-  usePlayMutation,
   useShuffleMutation,
   useRepeatMutation,
   TrackInQueue,
@@ -18,7 +17,7 @@ import { useDevice } from '../../contexts/DeviceContext';
 import { usePlayer } from '../../contexts/PlayerContext';
 import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import ProgressBar from './ProgressBar';
-import VolumeControl from './Volume';
+import VolumeControl from '../VolumeControl';
 
 const Container = styled.div`
   display: flex;
@@ -26,20 +25,20 @@ const Container = styled.div`
   justify-content: space-between;
   width: 100%;
   height: 100%;
+  max-height: 680px;
   padding: 1.5em;
   font-size: 15px;
   letter-spacing: 0.5px;
-
-  h2 {
-    margin: 0;
-    font-size: 20px;
-  }
 `;
 
 const PlayerHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+
+  h2 {
+    margin: 0;
+    margin-right: 0.8em;
+    font-size: 20px;
+  }
 `;
 
 const TrackImage = styled.img`
@@ -155,12 +154,11 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
   };
 
   const toggleShuffle = () => {
-    if (!device || !queue) return;
-
+    if (!device || !playbackState) return;
     shuffle({
       variables: {
         deviceId: device.id,
-        state: playbackState ? !playbackState.shuffle : true,
+        state: !playbackState.shuffle,
       },
     });
   };
@@ -191,7 +189,7 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
       <Container>
         <PlayerHeader>
           <h2>Now Playing</h2>
-          <VolumeControl onVolumeChange={onVolumeChange} />
+          <VolumeControl openProp={false} onVolumeChange={onVolumeChange} />
         </PlayerHeader>
         {curr && (
           <TrackInfo>
@@ -210,11 +208,6 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
             </p>
           </TrackInfo>
         )}
-        <ProgressBar playerState={playbackState} />
-        <NextTrack>
-          <span>Next</span>
-          <span>{next ? next.name : 'Unavailable'}</span>
-        </NextTrack>
         <ControlGroup>
           <StatefulIcon
             enabled={playbackState ? playbackState.shuffle : false}
@@ -256,6 +249,11 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
             <BsArrowRepeat className="icon" />
           </StatefulIcon>
         </ControlGroup>
+        <ProgressBar playerState={playbackState} />
+        <NextTrack>
+          <span>Next</span>
+          <span>{next ? next.name : 'Unavailable'}</span>
+        </NextTrack>
       </Container>
     </>
   );

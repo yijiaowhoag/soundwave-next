@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useArtistQuery } from '../../__generated__/types';
 import Layout from '../../components/shared/Layout';
 import ArtistTopTracks from '../../components/ArtistTopTracks';
-import ArtistCard from '../../components/Artists/ArtistCard';
+import SimilarArtists from '../../components/Artists';
 
 const Genres = styled.ul`
   display: flex;
@@ -52,28 +52,8 @@ const ArtistHeader = styled.div`
   }
 `;
 
-const SimilarArtists = styled.div`
-  h2 {
-    margin: 2rem;
-    font-weight: 400;
-    font-size: 20px;
-  }
-
-  ul {
-    display: flex;
-    margin: 0;
-    padding: 0;
-    overflow-x: scroll;
-    list-style: none;
-
-    li:first-child {
-      margin-left: 2rem;
-    }
-  }
-`;
-
 const Artist: React.FC<{ artistId: string }> = ({ artistId }) => {
-  const { data, loading } = useArtistQuery({
+  const { data, loading, error } = useArtistQuery({
     variables: { artistId, market: 'US' },
   });
 
@@ -89,21 +69,15 @@ const Artist: React.FC<{ artistId: string }> = ({ artistId }) => {
           <h1>{artistDetails.name}</h1>
           <Genres>
             {artistDetails.genres.map((genre) => (
-              <li>{genre}</li>
+              <li key={genre}>{genre}</li>
             ))}
           </Genres>
         </ArtistHeader>
         <ArtistTopTracks popularTracks={artistDetails.topTracks} />
-        <SimilarArtists>
-          <h2>Fans Also Like</h2>
-          <ul>
-            {artistDetails.relatedArtists.map((artist) => (
-              <li key={artist.id}>
-                <ArtistCard artist={artist} />
-              </li>
-            ))}
-          </ul>
-        </SimilarArtists>
+        <SimilarArtists
+          heading="Fans Also Like"
+          artists={artistDetails.relatedArtists}
+        />
       </Main>
     </Layout>
   );

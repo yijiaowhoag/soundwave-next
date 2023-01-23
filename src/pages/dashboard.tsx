@@ -1,5 +1,10 @@
 import styled from 'styled-components';
 import { FaPlus } from 'react-icons/fa';
+import {
+  useUserTopArtistsQuery,
+  usePlayMutation,
+} from '../__generated__/types';
+import { useDevice } from '../contexts/DeviceContext';
 import Layout from '../components/shared/Layout';
 import Modal from '../components/shared/Modal';
 import { OutlineButton } from '../components/shared/Button';
@@ -7,6 +12,7 @@ import SessionForm from '../components/SessionForm';
 import Sessions from '../components/Sessions';
 import TopTracks from '../components/TopTracks';
 import TopArtists from '../components/Artists';
+import PlayerBar from '../components/PlayerBar';
 
 const Main = styled.div`
   position: relative;
@@ -42,27 +48,59 @@ const ActionButton = styled(OutlineButton)`
   }
 `;
 
-const Dashboard: React.FC = () => (
-  <Layout>
-    <Main>
-      <ActionBar>
-        <h2>My Sessions</h2>
-        <Modal
-          activator={
-            <ActionButton>
-              New Session
-              <FaPlus className="plus-icon" />
-            </ActionButton>
-          }
-        >
-          {({ closeModal }) => <SessionForm onClose={closeModal} />}
-        </Modal>
-      </ActionBar>
-      <Sessions />
-      <TopTracks />
-      <TopArtists />
-    </Main>
-  </Layout>
-);
+const Dashboard: React.FC = () => {
+  const device = useDevice();
+
+  const { data, loading, error } = useUserTopArtistsQuery({
+    variables: {
+      offset: 0,
+      limit: 20,
+    },
+  });
+  const [play] = usePlayMutation();
+
+  const handlePlayQueue = (uris: string[], offset: number) => {
+    if (!device) return;
+
+    play({ variables: { deviceId: device.id, uris, offset } });
+  };
+
+  return (
+    <>
+      <Layout>
+        <Main>
+          {error && <strong>Error: {error}</strong>}
+          {loading && <span>Loading...</span>}
+          {data && (
+            <>
+              <ActionBar>
+                <h2>My Sessions</h2>
+                <Modal
+                  activator={
+                    <ActionButton>
+                      New Session
+                      <FaPlus className="plus-icon" />
+                    </ActionButton>
+                  }
+                >
+                  {({ closeModal }) => <SessionForm onClose={closeModal} />}
+                </Modal>
+              </ActionBar>
+              <Sessions />
+              <TopTracks handlePlayQueue={handlePlayQueue} />
+              <TopArtists
+                heading="Recent Artists"
+                artists={data.userTopArtists}
+                loading={loading}
+                error={JSON.stringify(error)}
+              />
+            </>
+          )}
+        </Main>
+      </Layout>
+      <PlayerBar />
+    </>
+  );
+};
 
 export default Dashboard;

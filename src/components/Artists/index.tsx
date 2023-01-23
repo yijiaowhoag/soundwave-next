@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import styled from 'styled-components';
-import { useUserTopArtistsQuery } from '../../__generated__/types';
+import type { Artist as SpotifyArtist } from '../../__generated__/types';
+import ArtistCard from './ArtistCard';
 
 const ArtistsDiv = styled.div`
   position: relative;
@@ -11,6 +12,10 @@ const ArtistsDiv = styled.div`
     margin: 2rem;
     font-weight: 400;
     font-size: 20px;
+  }
+
+  p {
+    margin: 0;
   }
 
   ul {
@@ -26,57 +31,37 @@ const ArtistsDiv = styled.div`
   }
 `;
 
-const ArtistCard = styled.div`
-  margin-right: 1rem;
-  text-align: center;
-`;
+interface ArtistsProps {
+  heading: string;
+  artists?: SpotifyArtist[];
+  loading?: boolean;
+  error?: string;
+}
 
-const ArtistImage = styled.div<{ imageSrc?: string }>`
-  width: 160px;
-  height: 120px;
-  border-radius: 5px;
-  background-image: url(${({ imageSrc }) => imageSrc});
-  background-size: cover;
-  background-position: center;
-`;
-
-const ArtistName = styled.h5`
-  margin: 0.8rem 0;
-`;
-
-const TopArtists: React.FC = () => {
-  const { data, loading } = useUserTopArtistsQuery({
-    variables: {
-      offset: 0,
-      limit: 20,
-    },
-  });
-
-  if (loading) return <p>Loading...</p>;
-
-  if (!data?.userTopArtists) return null;
-
+const Artists: React.FC<ArtistsProps> = ({
+  heading,
+  artists,
+  loading = false,
+  error,
+}) => {
   return (
     <ArtistsDiv>
-      <h2>Recent Artists</h2>
-      <ul>
-        {data.userTopArtists.map((artist) => (
-          <li key={artist.id}>
-            <Link href={`/artists/${artist.id}`}>
-              <ArtistCard>
-                <ArtistImage
-                  imageSrc={
-                    artist.images.filter((image) => image.height < 640)[0].url
-                  }
-                />
-                <ArtistName>{artist.name}</ArtistName>
-              </ArtistCard>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <h2>{heading}</h2>
+      <p>
+        {error && <strong>Error: {error}</strong>}
+        {loading && <span>Loading...</span>}
+      </p>
+      {artists && (
+        <ul>
+          {artists.map((artist) => (
+            <li key={artist.id}>
+              <ArtistCard artist={artist} />
+            </li>
+          ))}
+        </ul>
+      )}
     </ArtistsDiv>
   );
 };
 
-export default TopArtists;
+export default Artists;

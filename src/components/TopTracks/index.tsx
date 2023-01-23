@@ -1,10 +1,8 @@
 import styled from 'styled-components';
 import { BsPlayFill } from 'react-icons/bs';
 import { useUserTopTracksQuery } from '../../__generated__/types';
-import Modal from '../shared/Modal';
 import { OutlineButton } from '../shared/Button';
 import TrackCard from './TrackCard';
-import Player from '../Player';
 
 const TopTracksDiv = styled.div`
   ul {
@@ -44,25 +42,29 @@ const FetchMoreButton = styled(OutlineButton)`
   margin: 0 2.5rem;
 `;
 
-const TopTracks: React.FC = () => {
+interface TopTracksProps {
+  handlePlayQueue: (uris: string[], offset: number) => void;
+}
+
+const TopTracks: React.FC<TopTracksProps> = ({ handlePlayQueue }) => {
   const { data, loading, fetchMore } = useUserTopTracksQuery({
     variables: { offset: 0, limit: 20 },
   });
+
+  const play = () => {
+    const uris = data.userTopTracks.map((track) => track.uri);
+
+    handlePlayQueue(uris, 0);
+  };
 
   return (
     <TopTracksDiv>
       <TopTracksHeader>
         <h2>Weekly Top Tracks</h2>
-        <Modal
-          activator={
-            <PlayButton>
-              Play
-              <BsPlayFill className="play-icon" />
-            </PlayButton>
-          }
-        >
-          {({ closeModal }) => <Player queue={data?.userTopTracks ?? []} />}
-        </Modal>
+        <PlayButton onClick={play}>
+          Play
+          <BsPlayFill className="play-icon" />
+        </PlayButton>
       </TopTracksHeader>
       {loading && <p>Loading...</p>}
       {data && (
