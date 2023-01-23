@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { FaSpotify } from 'react-icons/fa';
@@ -46,17 +45,11 @@ const LoginButton = styled.button`
 `;
 
 const Login = () => {
-  const router = useRouter();
-
-  const login = async () => {
-    await fetch('/api/auth/login');
-  };
-
   return (
     <Container>
       <Logo src="/soundwave.png" />
       <Link href="/api/auth/login">
-        <LoginButton onClick={login}>
+        <LoginButton>
           <FaSpotify className="icon" />
           Sign in with Spotify
         </LoginButton>
