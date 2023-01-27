@@ -1,4 +1,4 @@
-import { createRef, forwardRef, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   BsPlayFill,
@@ -128,7 +128,10 @@ interface TrackProps {
   onAdd?: (track: TrackInQueue) => void;
 }
 
-const PlayableTrack: React.FC<TrackProps> = forwardRef(({ track }, ref) => {
+const PlayableTrack: React.FC<TrackProps> = forwardRef<
+  HTMLDivElement,
+  TrackProps
+>(({ track }, ref) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [addTrack] = useAddTrackMutation();
 

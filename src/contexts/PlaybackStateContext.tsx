@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { usePlayer } from './PlayerContext';
 
 const PlaybackStateContext = createContext<Spotify.PlaybackState | null>(null);
 
-export const PlaybackStateProvider: React.FC = ({ children }) => {
+export const PlaybackStateProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [playbackState, setPlaybackState] =
     useState<Spotify.PlaybackState | null>(null);
 

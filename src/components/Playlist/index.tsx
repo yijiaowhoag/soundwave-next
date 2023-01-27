@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { usePlayMutation, TrackInQueue } from '../../__generated__/types';
+import { usePlayMutation } from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
 import { usePlayer } from '../../contexts/PlayerContext';
 import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import Track from './Track';
+import type { PlaylistTrack } from '../../types';
 
 const Container = styled.div`
   width: 100%;
@@ -24,7 +25,7 @@ const Container = styled.div`
 
 interface PlaylistProps {
   sessionId: string;
-  queue?: TrackInQueue[];
+  queue?: PlaylistTrack[];
 }
 
 const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {

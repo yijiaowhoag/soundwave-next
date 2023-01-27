@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useCallback,
@@ -16,7 +16,9 @@ export const WebPlaybackSDKContext = createContext<boolean | undefined>(
 
 export const useWebPlaybackSDK = () => useContext(WebPlaybackSDKContext);
 
-export const WebPlaybackSDKProvider: React.FC = ({ children }) => {
+export const WebPlaybackSDKProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const auth = useAuth();
   const [ready, setReady] = useState(false);
 

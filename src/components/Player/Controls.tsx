@@ -8,7 +8,8 @@ import {
   BsShuffle,
   BsArrowRepeat,
 } from 'react-icons/bs';
-import { PlayerContext } from '../../contexts/PlayerContext';
+import { usePlayer } from '../../contexts/PlayerContext';
+import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 
 const ControlGroup = styled.div`
   display: flex;
@@ -39,7 +40,8 @@ interface ControlsProps {
 }
 
 const Controls: React.FC<ControlsProps> = ({ toggleShuffle, toggleRepeat }) => {
-  const { player, playbackState } = useContext(PlayerContext);
+  const player = usePlayer();
+  const playbackState = usePlaybackState();
 
   const [isShuffle, setShuffle] = useState<boolean>(false);
   const [repeatMode, setRepeatMode] = useState<number>(0);

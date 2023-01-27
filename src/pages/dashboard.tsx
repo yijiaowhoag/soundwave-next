@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
     <>
       <Layout>
         <Main>
-          {error && <strong>Error: {error}</strong>}
+          {error && <strong>Error: {JSON.stringify(error)}</strong>}
           {loading && <span>Loading...</span>}
           {data && (
             <>

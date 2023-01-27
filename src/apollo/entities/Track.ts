@@ -10,11 +10,11 @@ export class Album {
   @Field()
   name: string;
 
-  @Field()
-  release_date: string;
-
   @Field(() => [Image])
   images: Image[];
+
+  @Field(() => String, { nullable: true })
+  release_date?: string;
 }
 
 @ObjectType()
@@ -37,8 +37,8 @@ export class Track {
   @Field()
   uri: string;
 
-  @Field(() => Int)
-  popularity: number;
+  @Field(() => Int, { nullable: true })
+  popularity?: number;
 
   @Field(() => String, { nullable: true })
   preview_url?: string;

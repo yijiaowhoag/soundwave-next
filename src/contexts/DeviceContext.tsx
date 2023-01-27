@@ -10,7 +10,9 @@ const DeviceContext = createContext<Device | undefined>(undefined);
 
 export const useDevice = () => useContext(DeviceContext);
 
-export const DeviceProvider: React.FC = ({ children }) => {
+export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const player = usePlayer();
 
   const [device, setDevice] = useState<Device | undefined>();

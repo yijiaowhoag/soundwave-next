@@ -4,6 +4,7 @@ import { useWebPlaybackSDK } from './WebPlaybackSDKContext';
 export const PlayerContext = createContext<Spotify.Player | null>(null);
 
 export const PlayerProvider: React.FC<{
+  children: React.ReactNode;
   getOAuthToken: Spotify.PlayerInit['getOAuthToken'];
   name: Spotify.PlayerInit['name'];
   volume: Spotify.PlayerInit['volume'];

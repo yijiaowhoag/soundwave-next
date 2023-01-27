@@ -56,13 +56,10 @@ const Index = () => {
     <Layout>
       <div ref={boundingBoxRef} style={{ height: '100vh', overflow: 'scroll' }}>
         <SearchBar>
-          <SearchSelect
-            seeds={seeds}
-            onUpdateSeeds={(updated) => setSeeds(updated)}
-          />
+          <SearchSelect onUpdateSeeds={(updated) => setSeeds(updated)} />
         </SearchBar>
         <ResultsContainer active={!!data?.recommendations}>
-          <SearchResults tracks={data?.recommendations} ref={boundingBoxRef} />
+          <SearchResults tracks={data?.recommendations} />
           <AudioFilters
             onChange={(filter) => setFilters({ ...filters, ...filter })}
           />

@@ -3,6 +3,8 @@ query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
     id
     name
     album {
+      id
+      name
       images {
         url
         width

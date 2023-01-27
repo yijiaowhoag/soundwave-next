@@ -3,6 +3,7 @@
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "allowUmdGlobalAccess": true,
     "skipLibCheck": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
@@ -15,7 +16,7 @@
     "jsx": "preserve",
     "incremental": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "strictPropertyInitialization": false /* Enable strict checking of property initialization in classes. */,
     "types": ["node"],
     /* Experimental Options */

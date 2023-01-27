@@ -167,31 +167,28 @@ export class SessionResolver {
   ): Promise<TrackResponse> {
     try {
       const timestamp = Date.now().toString();
-
-      await db
+      const trackRef = db
         .collection('sessions')
         .doc(sessionId)
         .collection('queue')
         .doc(`${timestamp}:${track.id}`)
-        .set({ ...JSON.parse(JSON.stringify(track)), timestamp });
+        .withConverter(converter<TrackInQueue>());
+      await trackRef.set({ ...JSON.parse(JSON.stringify(track)), timestamp });
+      const data = (await trackRef.get()).data();
 
       return {
-        track: {
-          ...track,
-          id: `${timestamp}:${track.id}`,
-          timestamp,
-        },
+        track: data,
       };
     } catch (err) {
       throw new Error(err);
     }
   }
 
-  @Mutation(() => TrackResponse)
+  @Mutation(() => Boolean)
   async removeFromSession(
     @Arg('sessionId') sessionId: string,
     @Arg('track') track: RemoveTrackInput
-  ): Promise<TrackResponse> {
+  ): Promise<boolean> {
     try {
       await db
         .collection('sessions')
@@ -201,9 +198,7 @@ export class SessionResolver {
         .doc(track.id)
         .delete();
 
-      return {
-        track,
-      };
+      return true;
     } catch (err) {
       throw new Error(err);
     }

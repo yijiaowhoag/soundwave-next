@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import useDebounce from '../../hooks/useDebounce';
 
-interface SearchProps {
+interface SearchInputProps {
   fetchResults: (query: string) => void;
 }
 
-const SearchInput = styled.input``;
-
-const Search: React.FC<SearchProps> = ({ fetchResults }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ fetchResults }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
@@ -26,7 +23,7 @@ const Search: React.FC<SearchProps> = ({ fetchResults }) => {
   }, [debouncedSearchTerm]);
 
   return (
-    <SearchInput
+    <input
       placeholder="Search by Track"
       value={searchTerm}
       onChange={handleChange}
@@ -34,4 +31,4 @@ const Search: React.FC<SearchProps> = ({ fetchResults }) => {
   );
 };
 
-export default Search;
+export default SearchInput;

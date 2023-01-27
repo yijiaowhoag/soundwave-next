@@ -1,7 +1,7 @@
 import { createRef, forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import { BsPlayFill, BsPauseFill } from 'react-icons/bs';
-import { useAddTrackMutation, Track } from '../../__generated__/types';
+import { useAddTrackMutation, Track, Artist } from '../../__generated__/types';
 import { convertDurationMs } from '../../utils/convertDuration';
 import PreviewAudio from './PreviewAudio';
 import Menu from '../shared/Menu';
@@ -136,9 +136,13 @@ const IconWrapper = styled.div`
   height: 25px;
 `;
 
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
+type PreviewTrack = Omit<Track, 'artists'> & {
+  artists: Array<Optional<Artist, 'genres' | 'images' | 'uri'>>;
+};
 interface PreviewTrackProps {
-  track: Track;
-  onAdd?: (track: Track) => void;
+  track: PreviewTrack;
+  onAdd?: (track: PreviewTrack) => void;
 }
 
 const PreviewTrack: React.FC<PreviewTrackProps> = forwardRef(
@@ -193,7 +197,12 @@ const PreviewTrack: React.FC<PreviewTrackProps> = forwardRef(
             <span>{convertDurationMs(track.duration_ms)}</span>
             <Menu
               onAdd={(sessionId) =>
-                addTrack({ variables: { sessionId, track } })
+                addTrack({
+                  variables: {
+                    sessionId,
+                    track: { ...track, images: track.album.images },
+                  },
+                })
               }
             />
           </div>

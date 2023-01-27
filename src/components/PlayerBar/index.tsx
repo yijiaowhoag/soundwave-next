@@ -163,11 +163,7 @@ const PlayerBar: React.FC<PlayerProps> = () => {
         {curr && (
           <TrackInfo>
             <TrackImage
-              src={
-                (curr.images || curr.album.images).find(
-                  (image) => image.height === 300
-                )?.url
-              }
+              src={curr.album.images.find((image) => image.height === 300)?.url}
             />
             <div>
               <h2>{curr.name}</h2>

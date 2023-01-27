@@ -10,7 +10,6 @@ import {
 import {
   useShuffleMutation,
   useRepeatMutation,
-  TrackInQueue,
   RepeatMode,
 } from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
@@ -18,6 +17,7 @@ import { usePlayer } from '../../contexts/PlayerContext';
 import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import ProgressBar from './ProgressBar';
 import VolumeControl from '../VolumeControl';
+import type { PlaylistTrack } from '../../types';
 
 const Container = styled.div`
   display: flex;
@@ -132,7 +132,7 @@ enum PlaybackStateRepeat {
 }
 
 interface PlayerProps {
-  queue: TrackInQueue[];
+  queue: PlaylistTrack[];
 }
 
 const Player: React.FC<PlayerProps> = ({ queue }) => {
@@ -176,13 +176,8 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
     });
   };
 
-  const initial = 0;
-  const curr = playbackState
-    ? playbackState.track_window.current_track
-    : queue[initial];
-  const next = playbackState
-    ? playbackState.track_window.next_tracks[0]
-    : queue[initial + 1];
+  const curr = playbackState?.track_window.current_track;
+  const next = playbackState?.track_window.next_tracks[0];
   const isPaused = playbackState?.paused ?? true;
   return (
     <>
@@ -194,17 +189,13 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
         {curr && (
           <TrackInfo>
             <TrackImage
-              src={
-                (curr.images || curr.album.images).find(
-                  (image) => image.height === 300
-                )?.url
-              }
+              src={curr.album.images.find((image) => image.height === 300)?.url}
             />
             <h2>{curr.name}</h2>
             <p>
               {curr.artists
-                .reduce((acc, curr) => [...acc, curr.name], [])
-                .join(',')}
+                .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
+                .join(', ')}
             </p>
           </TrackInfo>
         )}

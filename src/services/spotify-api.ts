@@ -3,7 +3,6 @@ import {
   WillSendRequestOptions,
 } from '@apollo/datasource-rest';
 import querystring from 'querystring';
-import type { JWT } from '../lib/jwt';
 
 interface Paging<T> {
   items: T[];
@@ -17,7 +16,7 @@ export class SpotifyAPI extends RESTDataSource {
   override baseURL = process.env.SPOTIFY_API_ENDPOINT;
   private accessToken: string;
 
-  constructor(options: { session: JWT }) {
+  constructor(options) {
     super(options);
     this.accessToken = options.session.accessToken;
   }
@@ -60,7 +59,7 @@ export class SpotifyAPI extends RESTDataSource {
 
   async getRecommendations(
     seeds: string[],
-    filters?: { [key: string]: number }
+    filters?: Record<string, any>
   ): Promise<any> {
     const str = new URLSearchParams({
       seed_tracks: seeds.join(','),

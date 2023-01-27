@@ -2,14 +2,14 @@ import 'reflect-metadata';
 import { ApolloServer, BaseContext, ContextFunction } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import { GraphQLError } from 'graphql';
-import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
+import { NextApiHandler } from 'next';
 import { schema } from '../../apollo/schema';
 import { SpotifyAPI } from '../../services/spotify-api';
 import { encrypt, decrypt, JWT } from '../../lib/jwt';
 import { refreshAccessToken } from '../../services/auth';
 import { setCookie } from '../../lib/cookies';
 
-interface Context extends BaseContext {
+interface ContextValue extends BaseContext {
   session?: JWT;
   dataSources: {
     spotifyAPI: SpotifyAPI;
@@ -18,14 +18,14 @@ interface Context extends BaseContext {
 
 const createApolloContext: ContextFunction<
   Parameters<NextApiHandler>,
-  Context
+  ContextValue
 > = async (req, res) => {
   const { sessionToken } = req.cookies;
 
-  const session = await decrypt({
+  const session = (await decrypt({
     token: sessionToken,
     secret: process.env.TOKEN_SECRET!,
-  });
+  })) as JWT;
 
   if (!session) {
     throw new GraphQLError('User is not authenticated', {
@@ -58,10 +58,10 @@ const createApolloContext: ContextFunction<
   };
 };
 
-const apolloServer = new ApolloServer<Context>({
+const apolloServer = new ApolloServer<ContextValue>({
   schema,
 });
 
-export default startServerAndCreateNextHandler<Context>(apolloServer, {
+export default startServerAndCreateNextHandler<ContextValue>(apolloServer, {
   context: createApolloContext,
 });

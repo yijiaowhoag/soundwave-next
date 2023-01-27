@@ -52,6 +52,8 @@ const TopTracks: React.FC<TopTracksProps> = ({ handlePlayQueue }) => {
   });
 
   const play = () => {
+    if (!data?.userTopTracks) return;
+
     const uris = data.userTopTracks.map((track) => track.uri);
 
     handlePlayQueue(uris, 0);

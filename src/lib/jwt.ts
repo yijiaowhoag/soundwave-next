@@ -8,7 +8,7 @@ const now = () => (Date.now() / 1000) | 0;
 
 export async function encrypt(params: JWTEncodeParams): Promise<string> {
   const {
-    payload = {},
+    payload,
     secret = process.env.TOKEN_SECRET,
     maxAge = DEFAULT_MAX_AGE,
   } = params;
@@ -57,14 +57,8 @@ export interface DefaultJWT extends Record<string, unknown> {
 export interface JWT extends Record<string, unknown>, DefaultJWT {}
 
 export interface JWTEncodeParams {
-  /** The JWT payload. */
   payload?: JWT;
-  /** The secret used to encode the NextAuth.js issued JWT. */
   secret: string | Buffer;
-  /**
-   * The maximum age of the NextAuth.js issued JWT in seconds.
-   * @default 30 * 24 * 30 * 60 // 30 days
-   */
   maxAge?: number;
 }
 

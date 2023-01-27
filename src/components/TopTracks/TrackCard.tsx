@@ -1,17 +1,16 @@
 import styled from 'styled-components';
-import { Track, Album, Artist } from '../../__generated__/types';
+import type { Album } from '../../__generated__/types';
+import type { Modify, Optional, PreviewTrack } from '../../types';
 
-type Modify<T, R> = Omit<T, keyof R> & R;
 type TrackCard = Modify<
-  Track,
+  PreviewTrack,
   {
-    album: Partial<Album>;
-    artists: Partial<Artist>[];
+    album: Optional<Album, 'id' | 'name'>;
   }
 >;
 
 interface TrackCardProps {
-  track: Partial<TrackCard>;
+  track: TrackCard;
 }
 
 const Card = styled.div`

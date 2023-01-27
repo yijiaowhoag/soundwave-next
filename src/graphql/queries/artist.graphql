@@ -20,6 +20,10 @@ query Artist($artistId: String!, $market: String!) {
           height
         }
       }
+      artists {
+        id
+        name
+      }
       duration_ms
       popularity
       preview_url
@@ -34,6 +38,7 @@ query Artist($artistId: String!, $market: String!) {
         width
         height
       }
+      uri
     }
   }
 }

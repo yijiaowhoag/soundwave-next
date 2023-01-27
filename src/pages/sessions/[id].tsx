@@ -1,8 +1,7 @@
-import { GetServerSideProps } from 'next';
 import styled from 'styled-components';
 import { BsPlayCircleFill } from 'react-icons/bs';
+import type { GetServerSideProps } from 'next';
 import { useSessionQuery, usePlayMutation } from '../../__generated__/types';
-import { getServerSideProps as serverProps } from '../../lib/getServerSideProps';
 import { useDevice } from '../../contexts/DeviceContext';
 import Layout from '../../components/shared/Layout';
 import Playlist from '../../components/Playlist';
@@ -119,16 +118,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: { sessionId: context.params?.id },
   };
 };
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const { props } = await serverProps(context.req, context.res);
-
-//   return {
-//     props: {
-//       ...props,
-//       ...{ sessionId: context.params?.id },
-//     },
-//   };
-// };
 
 export default Session;

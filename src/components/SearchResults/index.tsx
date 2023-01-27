@@ -1,10 +1,10 @@
 import { forwardRef } from 'react';
 import styled from 'styled-components';
-import { Track } from '../../__generated__/types';
 import PreviewTrack from './PreviewTrack';
+import { PreviewTrack as SearchResult } from '../../types';
 
 interface SearchResultsProps {
-  tracks?: Track[];
+  tracks?: SearchResult[];
 }
 
 const TracksContainer = styled.div`
@@ -28,7 +28,7 @@ const SearchResults: React.FC<SearchResultsProps> = forwardRef(
           <ul>
             {tracks.map((track) => (
               <li key={track.id}>
-                <PreviewTrack track={track} ref={ref} />
+                <PreviewTrack track={track} />
               </li>
             ))}
           </ul>

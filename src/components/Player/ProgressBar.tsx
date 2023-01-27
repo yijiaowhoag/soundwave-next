@@ -1,3 +1,4 @@
+/// <reference types="@types/spotify-web-playback-sdk"/>
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { convertDurationMs } from '../../utils/convertDuration';

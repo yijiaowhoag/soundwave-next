@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import styled from 'styled-components';
-import { Track } from '../../__generated__/types';
 import { OutlineButton } from '../shared/Button';
 import PreviewTrack from '../SearchResults/PreviewTrack';
+import type { PreviewTrack as PopularTrack } from '../../types';
 
 const ArtistTracksDiv = styled.div`
   ul {
@@ -32,7 +32,7 @@ const ShowMoreButton = styled(OutlineButton)`
 `;
 
 interface ArtistTopTracksProps {
-  popularTracks: Partial<Track>[];
+  popularTracks: PopularTrack[];
 }
 
 const ArtistTopTracks: React.FC<ArtistTopTracksProps> = ({ popularTracks }) => {

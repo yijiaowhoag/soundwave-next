@@ -31,7 +31,7 @@ export type Album = {
   id: Scalars['ID'];
   images: Array<Image>;
   name: Scalars['String'];
-  release_date: Scalars['String'];
+  release_date?: Maybe<Scalars['String']>;
 };
 
 export type Artist = IArtist & {
@@ -108,7 +108,7 @@ export type Mutation = {
   deleteSession: Scalars['Boolean'];
   favoriteTrack: Scalars['ID'];
   play: Scalars['Boolean'];
-  removeFromSession: TrackResponse;
+  removeFromSession: Scalars['Boolean'];
   repeat: Scalars['Boolean'];
   shuffle: Scalars['Boolean'];
   unfavoriteTrack: Scalars['ID'];
@@ -250,7 +250,7 @@ export type Track = {
   duration_ms: Scalars['Int'];
   id: Scalars['ID'];
   name: Scalars['String'];
-  popularity: Scalars['Int'];
+  popularity?: Maybe<Scalars['Int']>;
   preview_url?: Maybe<Scalars['String']>;
   uri: Scalars['String'];
 };
@@ -318,7 +318,7 @@ export type RemoveTrackMutationVariables = Exact<{
 }>;
 
 
-export type RemoveTrackMutation = { __typename?: 'Mutation', removeFromSession: { __typename?: 'TrackResponse', track: { __typename?: 'TrackInQueue', id: string } } };
+export type RemoveTrackMutation = { __typename?: 'Mutation', removeFromSession: boolean };
 
 export type RepeatMutationVariables = Exact<{
   deviceId: Scalars['String'];
@@ -342,7 +342,7 @@ export type ArtistQueryVariables = Exact<{
 }>;
 
 
-export type ArtistQuery = { __typename?: 'Query', artistDetails: { __typename?: 'ArtistDetails', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }>, topTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, popularity: number, preview_url?: string | null, uri: string, album: { __typename?: 'Album', id: string, name: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> } }>, relatedArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
+export type ArtistQuery = { __typename?: 'Query', artistDetails: { __typename?: 'ArtistDetails', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }>, topTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, popularity?: number | null, preview_url?: string | null, uri: string, album: { __typename?: 'Album', id: string, name: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }>, relatedArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, uri: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -355,7 +355,7 @@ export type RecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, popularity: number, duration_ms: number, uri: string, preview_url?: string | null, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
+export type RecommendationsQuery = { __typename?: 'Query', recommendations: Array<{ __typename?: 'Track', id: string, name: string, popularity?: number | null, duration_ms: number, uri: string, preview_url?: string | null, album: { __typename?: 'Album', id: string, name: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
 
 export type SearchQueryVariables = Exact<{
   searchTerm: Scalars['String'];
@@ -369,7 +369,7 @@ export type SessionQueryVariables = Exact<{
 }>;
 
 
-export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, queue: Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp: string, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
+export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, description?: string | null, queue: Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp: string, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
 
 export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -540,11 +540,7 @@ export type PlayMutationResult = Apollo.MutationResult<PlayMutation>;
 export type PlayMutationOptions = Apollo.BaseMutationOptions<PlayMutation, PlayMutationVariables>;
 export const RemoveTrackDocument = gql`
     mutation RemoveTrack($sessionId: String!, $track: RemoveTrackInput!) {
-  removeFromSession(sessionId: $sessionId, track: $track) {
-    track {
-      id
-    }
-  }
+  removeFromSession(sessionId: $sessionId, track: $track)
 }
     `;
 export type RemoveTrackMutationFn = Apollo.MutationFunction<RemoveTrackMutation, RemoveTrackMutationVariables>;
@@ -661,6 +657,10 @@ export const ArtistDocument = gql`
           height
         }
       }
+      artists {
+        id
+        name
+      }
       duration_ms
       popularity
       preview_url
@@ -675,6 +675,7 @@ export const ArtistDocument = gql`
         width
         height
       }
+      uri
     }
   }
 }
@@ -755,6 +756,8 @@ export const RecommendationsDocument = gql`
     id
     name
     album {
+      id
+      name
       images {
         url
         width
@@ -854,6 +857,7 @@ export const SessionDocument = gql`
   session(sessionId: $sessionId) {
     id
     name
+    description
     queue {
       id
       name

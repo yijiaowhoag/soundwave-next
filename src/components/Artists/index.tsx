@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import styled from 'styled-components';
 import type { Artist as SpotifyArtist } from '../../__generated__/types';
 import ArtistCard from './ArtistCard';
@@ -33,7 +32,7 @@ const ArtistsDiv = styled.div`
 
 interface ArtistsProps {
   heading: string;
-  artists?: SpotifyArtist[];
+  artists?: Partial<SpotifyArtist[]>;
   loading?: boolean;
   error?: string;
 }

@@ -10,15 +10,10 @@ import {
   Float,
   registerEnumType,
 } from 'type-graphql';
+import { Image } from '../entities/Image';
 import { Track } from '../entities/Track';
 import { Artist, ArtistDetails } from '../entities/Artist';
 import { RepeatMode, type Context } from '../../types';
-
-interface ImageObject {
-  height: number;
-  url: string;
-  width: number;
-}
 
 registerEnumType(RepeatMode, { name: 'RepeatMode' });
 
@@ -76,7 +71,7 @@ export class AudioFiltersInput {
   max_valence?: number;
 
   @Field(() => Float, { nullable: true })
-  target_valence: number;
+  target_valence?: number;
 }
 
 @Resolver()
@@ -149,7 +144,8 @@ export class SpotifyResolver {
 
     const response = await dataSources.spotifyAPI.getRecommendations(
       seeds,
-      filters && Object.entries(filters).filter(([k, v]) => v !== undefined)
+      filters &&
+        Object.entries(filters).filter(([k, v], i) => filters[k] !== undefined)
     );
     const items = Array.isArray(response.tracks)
       ? response.tracks.map(trackReducer)
@@ -181,10 +177,6 @@ export class SpotifyResolver {
   ): Promise<boolean> {
     const response = await dataSources.spotifyAPI.play(deviceId, uris, offset);
 
-    if (response.error) {
-      throw new Error(response.error.message);
-    }
-
     return true;
   }
 
@@ -199,11 +191,6 @@ export class SpotifyResolver {
       state
     );
 
-    if (response.error) {
-      console.log('RESPONSE.ERROR', response.error.message);
-      throw new Error(response.error.message);
-    }
-
     return true;
   }
 
@@ -214,10 +201,6 @@ export class SpotifyResolver {
     @Ctx() { dataSources }: Context
   ): Promise<boolean> {
     const response = await dataSources.spotifyAPI.toggleRepeat(deviceId, state);
-
-    if (response.error) {
-      throw new Error(response.error.message);
-    }
 
     return true;
   }
@@ -241,7 +224,7 @@ function trackReducer(track) {
       id: track.album.id,
       name: track.album.name,
       release_date: track.album.release_date,
-      images: track.album.images.map((image: ImageObject) => ({
+      images: track.album.images.map((image: Image) => ({
         width: image.width,
         height: image.height,
         url: image.url,

@@ -1,12 +1,19 @@
 import { useRouter } from 'next/router';
 import { createContext, useContext, useState, useEffect } from 'react';
-import { AuthSession } from '../lib/authSession';
+import type { User } from '../types';
+
+interface AuthSession {
+  accessToken: string;
+  user: User;
+}
 
 export const AuthContext = createContext<AuthSession | undefined>(undefined);
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const router = useRouter();
   const [isLoading, setLoading] = useState(true);
   const [auth, setAuth] = useState<AuthSession>();

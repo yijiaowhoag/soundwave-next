@@ -1,11 +1,5 @@
 import styled, { css } from 'styled-components';
-import {
-  BsPlayFill,
-  BsPauseFill,
-  BsSuitHeartFill,
-  BsSuitHeart,
-} from 'react-icons/bs';
-import { RiDeleteBinLine } from 'react-icons/ri';
+import { BsPlayFill, BsPauseFill } from 'react-icons/bs';
 import {
   useAddTrackMutation,
   useRemoveTrackMutation,
@@ -14,10 +8,10 @@ import {
   SessionQueryVariables,
   AddTrackInput,
   RemoveTrackInput,
-  TrackInQueue,
 } from '../../__generated__/types';
 import Menu from '../shared/Menu';
 import { convertDurationMs } from '../../utils/convertDuration';
+import type { PlaylistTrack } from '../../types';
 
 const TrackContent = styled.div`
   display: flex;
@@ -135,7 +129,7 @@ const TrackContainer = styled.div<{
 
 interface TrackProps {
   sessionId: string;
-  track: TrackInQueue;
+  track: PlaylistTrack;
   isCurrent: boolean;
   isPaused: boolean;
   isSelected: boolean;
@@ -207,9 +201,7 @@ const Track: React.FC<TrackProps> = ({
           data: {
             session: {
               ...x.session,
-              queue: x.session.queue.filter(
-                ({ id }) => id !== data.removeFromSession?.track.id
-              ),
+              queue: x.session.queue.filter(({ id }) => id !== track.id),
             },
           },
         });
@@ -249,12 +241,6 @@ const Track: React.FC<TrackProps> = ({
               .join(', ')}
           </TrackArtists>
         </div>
-        {/* <IconWrapper onClick={() => onAdd(track)}>
-          <BsSuitHeart className="icon" />
-        </IconWrapper>
-        <IconWrapper onClick={() => onRemove(track)}>
-          <RiDeleteBinLine className="icon" />
-        </IconWrapper> */}
         <div>
           <span>{convertDurationMs(track.duration_ms)}</span>
           <Menu
@@ -263,7 +249,7 @@ const Track: React.FC<TrackProps> = ({
           />
         </div>
       </TrackContent>
-      <HoverBkg />
+      <HoverBkg isCurrent={isCurrent} />
     </TrackContainer>
   );
 };
