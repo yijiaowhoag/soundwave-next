@@ -1,8 +1,6 @@
-import {
-  RESTDataSource,
-  WillSendRequestOptions,
-} from '@apollo/datasource-rest';
+import { RESTDataSource, AugmentedRequest } from '@apollo/datasource-rest';
 import querystring from 'querystring';
+import type { JWT } from '../lib/jwt';
 
 interface Paging<T> {
   items: T[];
@@ -21,7 +19,7 @@ export class SpotifyAPI extends RESTDataSource {
     this.accessToken = options.session.accessToken;
   }
 
-  override willSendRequest(request: WillSendRequestOptions) {
+  override willSendRequest(path: string, request: AugmentedRequest) {
     request.headers['authorization'] = `Bearer ${this.accessToken}`;
   }
 

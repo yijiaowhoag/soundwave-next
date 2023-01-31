@@ -6,19 +6,7 @@ import type { Context } from '../../types';
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(@Ctx() ctx: Context): Promise<User | null> {
-    const user = await db
-      .collection('users')
-      .doc(ctx.session.user.id)
-      .withConverter(userConverter)
-      .get();
-
-    return user.data() || null;
+  async me(@Ctx() ctx: Context): Promise<User> {
+    return await db.getUser(ctx.session.user.id);
   }
 }
-
-const userConverter = {
-  toFirestore: (data: User) => data,
-  fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot) =>
-    ({ id: snapshot.id, ...snapshot.data() } as User),
-};

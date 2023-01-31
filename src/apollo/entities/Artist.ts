@@ -1,4 +1,4 @@
-import { InterfaceType, Field, ObjectType, ID } from 'type-graphql';
+import { Field, ID, InterfaceType, ObjectType, InputType } from 'type-graphql';
 import { Track } from './Track';
 import { Image } from './Image';
 
@@ -36,4 +36,13 @@ export class ArtistDetails extends Artist {
 
   @Field(() => [Artist])
   relatedArtists: Artist[];
+}
+
+@InputType()
+export class ArtistInput {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  name: string;
 }

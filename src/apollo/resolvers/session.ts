@@ -4,74 +4,17 @@ import {
   Mutation,
   Arg,
   Ctx,
-  InputType,
-  ObjectType,
   Field,
-  ID,
-  Int,
+  ObjectType,
 } from 'type-graphql';
-import admin from 'firebase-admin';
 import { Session } from '../entities/Session';
-import { TrackInQueue } from '../entities/Queue';
-import { db, converter } from '../../services/firestore';
+import {
+  TrackInQueue,
+  AddTrackInput,
+  RemoveTrackInput,
+} from '../entities/Track';
+import { db } from '../../services/firestore';
 import type { Context } from '../../types';
-
-@InputType()
-export class ArtistInput {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  name: string;
-}
-
-@InputType()
-export class ImageInput {
-  @Field(() => Int, { nullable: true })
-  width?: number;
-
-  @Field(() => Int, { nullable: true })
-  height?: number;
-
-  @Field()
-  url: string;
-}
-
-@InputType()
-export class TrackInput {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  name: string;
-
-  @Field(() => [ArtistInput])
-  artists: ArtistInput[];
-
-  @Field(() => [ImageInput])
-  images: ImageInput[];
-
-  @Field(() => Int)
-  duration_ms: number;
-
-  @Field()
-  uri: string;
-}
-
-@InputType()
-export class AddTrackInput extends TrackInput {
-  @Field({ nullable: true })
-  preview_url?: string;
-
-  @Field({ nullable: true })
-  timestamp?: string;
-}
-
-@InputType()
-export class RemoveTrackInput extends TrackInput {
-  @Field()
-  timestamp: string;
-}
 
 @ObjectType()
 export class SessionResponse {
@@ -88,49 +31,13 @@ export class TrackResponse {
 @Resolver(Session)
 export class SessionResolver {
   @Query(() => [Session])
-  async sessions(@Ctx() ctx: Context): Promise<Session[]> {
-    const sessionsRef = db
-      .collection('sessions')
-      .withConverter(converter<Session>())
-      .where('creatorId', '==', ctx.session.user.id)
-      .orderBy(
-        'createdAt',
-        'desc'
-      ) as FirebaseFirestore.CollectionReference<Session>;
-
-    try {
-      const querySnapshot = await sessionsRef.get();
-
-      return querySnapshot ? querySnapshot.docs.map((doc) => doc.data()) : [];
-    } catch (err) {
-      throw new Error(err);
-    }
+  async sessions(@Ctx() ctx: Context): Promise<Omit<Session, 'queue'>[]> {
+    return await db.getUserSessions(ctx.session.user.id);
   }
 
   @Query(() => Session)
   async session(@Arg('sessionId') sessionId: string): Promise<Session> {
-    const sessionRef = db
-      .collection('sessions')
-      .withConverter(converter<Session>())
-      .doc(sessionId);
-    const queueRef = sessionRef
-      .collection('queue')
-      .withConverter(converter<TrackInQueue>())
-      .orderBy('timestamp', 'desc');
-
-    try {
-      const session = await sessionRef.get();
-      const queue = await queueRef.get();
-
-      return {
-        id: session.id,
-        name: session.data()?.name || '',
-        description: session.data()?.description || '',
-        queue: queue.docs.map((doc) => doc.data()) || [],
-      };
-    } catch (err) {
-      throw new Error(err);
-    }
+    return await db.getSessionById(sessionId);
   }
 
   @Mutation(() => Boolean)
@@ -139,23 +46,18 @@ export class SessionResolver {
     @Arg('description', { nullable: true }) description: string,
     @Ctx() ctx: Context
   ): Promise<boolean> {
-    try {
-      await db.collection('sessions').add({
-        name,
-        description,
-        creatorId: ctx.session.user.id,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+    await db.createSession({
+      name,
+      description,
+      creatorId: ctx.session.user.id,
+    });
 
-      return true;
-    } catch (err) {
-      throw new Error(err);
-    }
+    return true;
   }
 
   @Mutation(() => Boolean)
   async deleteSession(@Arg('sessionId') sessionId: string): Promise<boolean> {
-    await db.collection('sessions').doc(sessionId).delete();
+    await db.deleteSession(sessionId);
 
     return true;
   }
@@ -165,23 +67,11 @@ export class SessionResolver {
     @Arg('sessionId') sessionId: string,
     @Arg('track') track: AddTrackInput
   ): Promise<TrackResponse> {
-    try {
-      const timestamp = Date.now().toString();
-      const trackRef = db
-        .collection('sessions')
-        .doc(sessionId)
-        .collection('queue')
-        .doc(`${timestamp}:${track.id}`)
-        .withConverter(converter<TrackInQueue>());
-      await trackRef.set({ ...JSON.parse(JSON.stringify(track)), timestamp });
-      const data = (await trackRef.get()).data();
+    const data = await db.addTrackToSession(sessionId, track);
 
-      return {
-        track: data,
-      };
-    } catch (err) {
-      throw new Error(err);
-    }
+    return {
+      track: data,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -189,63 +79,8 @@ export class SessionResolver {
     @Arg('sessionId') sessionId: string,
     @Arg('track') track: RemoveTrackInput
   ): Promise<boolean> {
-    try {
-      await db
-        .collection('sessions')
-        .doc(sessionId)
-        .collection('queue')
-        .withConverter(converter<TrackInQueue>())
-        .doc(track.id)
-        .delete();
+    await db.removeTrackFromSession(sessionId, track.id);
 
-      return true;
-    } catch (err) {
-      throw new Error(err);
-    }
-  }
-
-  @Mutation(() => ID)
-  async favoriteTrack(
-    @Arg('track') track: AddTrackInput,
-    @Ctx() ctx: Context
-  ): Promise<string> {
-    const id = `${Date.now().toString()}:${track.id}`;
-    try {
-      const result = await db
-        .collection('users')
-        .doc(ctx.session.user.id)
-        .collection('favorites')
-        .doc(id)
-        .set({
-          ...track,
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-      console.log('FavoriteTrack -> ', result);
-
-      return id;
-    } catch (err) {
-      throw new Error(err);
-    }
-  }
-
-  @Mutation(() => ID)
-  async unfavoriteTrack(
-    @Arg('track') track: RemoveTrackInput,
-    @Ctx() ctx: Context
-  ): Promise<string> {
-    try {
-      const result = await db
-        .collection('users')
-        .doc(ctx.session.user.id)
-        .collection('favorites')
-        .doc(`${Date.now().toString()}:${track.id}`)
-        .delete();
-
-      console.log('WriteResult: ', result);
-      return track.id;
-    } catch (err) {
-      throw new Error(err);
-    }
+    return true;
   }
 }

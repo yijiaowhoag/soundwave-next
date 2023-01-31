@@ -106,12 +106,10 @@ export type Mutation = {
   addToSession: TrackResponse;
   createSession: Scalars['Boolean'];
   deleteSession: Scalars['Boolean'];
-  favoriteTrack: Scalars['ID'];
   play: Scalars['Boolean'];
   removeFromSession: Scalars['Boolean'];
   repeat: Scalars['Boolean'];
   shuffle: Scalars['Boolean'];
-  unfavoriteTrack: Scalars['ID'];
 };
 
 
@@ -129,11 +127,6 @@ export type MutationCreateSessionArgs = {
 
 export type MutationDeleteSessionArgs = {
   sessionId: Scalars['String'];
-};
-
-
-export type MutationFavoriteTrackArgs = {
-  track: AddTrackInput;
 };
 
 
@@ -159,11 +152,6 @@ export type MutationRepeatArgs = {
 export type MutationShuffleArgs = {
   deviceId: Scalars['String'];
   state: Scalars['Boolean'];
-};
-
-
-export type MutationUnfavoriteTrackArgs = {
-  track: RemoveTrackInput;
 };
 
 export type Query = {

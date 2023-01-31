@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from 'type-graphql';
-import { TrackInQueue } from './Queue';
+import { TrackInQueue } from './Track';
 
 @ObjectType()
 export class Session {
