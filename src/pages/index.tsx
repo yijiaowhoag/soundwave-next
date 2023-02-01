@@ -6,10 +6,10 @@ import SearchSelect from '../components/Search/SearchSelect';
 import AudioFilters from '../components/SearchResults/AudioFilters';
 import SearchResults from '../components/SearchResults';
 
-const SIDE_CONTAINER_WIDTH = '320px';
+const SearchBarContainer = styled.div`
+  height: ${({ theme }) => theme.columns(2.5)};
+  padding-top: 1.5rem;
 
-const SearchBar = styled.div`
-  margin-right: ${SIDE_CONTAINER_WIDTH};
   .Select-menu-outer {
     z-index: 100 !important;
   }
@@ -22,7 +22,7 @@ const ResultsContainer = styled.div<{ active: boolean }>`
   justify-content: space-between;
   min-height: 100%;
   transform: scale(0);
-  border-top: 2.5px solid ${({ theme }) => theme.colors.lightGreen10};
+  border-top: 2.5px solid ${({ theme }) => theme.colors.darkGreen30};
   background: ${({ theme }) =>
     `linear-gradient(to bottom, transparent 5%, ${theme.colors.lightGreen10} 25%, ${theme.colors.green})`};
   overflow: auto;
@@ -55,9 +55,9 @@ const Index = () => {
   return (
     <Layout>
       <div ref={boundingBoxRef} style={{ height: '100vh', overflow: 'scroll' }}>
-        <SearchBar>
+        <SearchBarContainer>
           <SearchSelect onUpdateSeeds={(updated) => setSeeds(updated)} />
-        </SearchBar>
+        </SearchBarContainer>
         <ResultsContainer active={!!data?.recommendations}>
           <SearchResults tracks={data?.recommendations} />
           <AudioFilters

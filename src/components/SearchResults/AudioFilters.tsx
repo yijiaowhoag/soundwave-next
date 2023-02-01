@@ -7,7 +7,8 @@ const Container = styled.div`
   top: 0;
   display: flex;
   flex-direction: column;
-  width: 320px;
+  width: ${({ theme }) => theme.columns(3)};
+  min-width: 320px;
   height: 100%;
   padding: 0 1.5rem;
 

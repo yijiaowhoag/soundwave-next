@@ -15,34 +15,47 @@ import Option from './Option';
 import type { OptionType } from './Option';
 import theme from '../../theme';
 
+const SearchSelectContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+
 const ValuesContainer = styled.div`
   display: flex;
-  flex-flow: row wrap;
-  padding-left: 1rem;
+  flex-flow: row nowrap;
+  padding-left: 1.5rem;
 `;
 
 const customStyles: StylesConfig<OptionType> = {
   container: (base) => ({
     ...base,
+    position: 'absolute',
+    bottom: 0,
     width: '100%',
-    padding: '0 1rem',
-    marginBottom: '1rem',
   }),
 
   control: (base) => ({
     ...base,
+    width: `${theme.columns(7)}`,
+    maxWidth: `calc(100% - 320px)`,
     height: '15vw',
     cursor: 'text',
     border: 0,
     borderRadius: 0,
     boxShadow: 'none',
+    paddingLeft: '1rem',
     fontWeight: 'bold',
     fontSize: 72,
   }),
 
   menu: (base) => ({
     ...base,
+    left: '1.5rem',
+    width: 'calc(100% - 1.5rem)',
+    marginTop: 0,
     border: `1.5px solid ${theme.colors.lightGreen}`,
+    borderRadius: 0,
   }),
 
   option: (base) => ({
@@ -104,15 +117,20 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
   };
 
   return (
-    <div>
+    <SearchSelectContainer>
       <ValuesContainer>
         {isMulti
           ? value.map((v) => (
-              <CustomValue selected={v} onRemoveValue={handleRemoveValue} />
+              <CustomValue
+                key={v.value}
+                selected={v}
+                onRemoveValue={handleRemoveValue}
+              />
             ))
           : null}
       </ValuesContainer>
       <AsyncSelect
+        instanceId="async-select"
         cacheOptions
         components={{
           DropdownIndicator: () => null,
@@ -122,6 +140,8 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
         controlShouldRenderValue={false}
         isClearable={false}
         isMulti={isMulti}
+        value={value}
+        onChange={onChange}
         loadOptions={debouncedLoadOptions}
         menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
         openMenuOnClick={false}
@@ -139,7 +159,7 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
           },
         })}
       />
-    </div>
+    </SearchSelectContainer>
   );
 };
 

@@ -9,7 +9,8 @@ interface SearchResultsProps {
 
 const TracksContainer = styled.div`
   width: ${({ theme }) => theme.columns(7)};
-  padding: 0 1rem 0 2rem;
+  max-width: calc(100% - 320px);
+  padding: 0 1rem 0 1.5rem;
   background-color: ${({ theme }) => theme.colors.lightGreen10};
 
   > ul {

@@ -24,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
   } else {
     removeCookie(res, AUTH_STATE_KEY);
+
     try {
       const { access_token, refresh_token, expires_in } = await getAccessToken(
         code

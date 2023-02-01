@@ -1,50 +1,78 @@
 import styled from 'styled-components';
-import { RiDeleteBack2Line } from 'react-icons/ri';
+import { CgClose } from 'react-icons/cg';
 import type { OptionType } from './Option';
 
 const ValueContainer = styled.div`
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   min-width: 10rem;
   max-width: 20rem;
   margin-right: 10px;
   border-radius: 5px;
   background-color: ${({ theme }) => theme.colors.lightGreen};
-  font-weight: bold;
-  font-size: 18px;
+`;
 
-  .image-container {
-    position: relative;
-    width: 45px;
-    height: 45px;
+const ImageContainer = styled.div`
+  position: relative;
+  width: 45px;
+  height: 45px;
 
-    .image-overlay {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      border-radius: 5px 0 0 5px;
-      background: ${({ theme }) =>
-        `linear-gradient(45deg, ${theme.colors.spotifyGreen}, ${theme.colors.lightGreen30})`};
-      opacity: 0.7;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-      border-radius: 5px 0 0 5px;
-    }
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 5px 0 0 5px;
+    background: ${({ theme }) =>
+      `linear-gradient(45deg, ${theme.colors.spotifyGreen}, ${theme.colors.lightGreen30})`};
+    opacity: 0.7;
   }
 
-  svg {
-    width: 20px;
-    height: 20px;
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px 0 0 5px;
   }
 `;
 
-const ValueRemove = styled.span``;
+const Value = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+`;
+
+const ValueLabel = styled.span`
+  display: flex;
+  align-items: center;
+  max-width: 10rem;
+  margin: 0 1rem 0 0.5rem;
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ValueRemove = styled.span`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2rem;
+  height: 100%;
+  cursor: pointer;
+  border-radius: 0 5px 5px 0;
+
+  :hover {
+    background-color: ${({ theme }) => theme.colors.darkGreen30};
+  }
+
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+`;
 
 interface CustomValueProps {
   selected: OptionType;
@@ -60,14 +88,16 @@ const CustomValue: React.FC<CustomValueProps> = ({
 
   return (
     <ValueContainer>
-      <div className="image-container">
+      <ImageContainer>
         <div className="image-overlay" />
         <img src={selected.imageUrl} />
-      </div>
-      <span>{selected.label}</span>
-      <ValueRemove onClick={onRemove}>
-        <RiDeleteBack2Line />
-      </ValueRemove>
+      </ImageContainer>
+      <Value>
+        <ValueLabel>{selected.label}</ValueLabel>
+        <ValueRemove onClick={onRemove}>
+          <CgClose className="icon" />
+        </ValueRemove>
+      </Value>
     </ValueContainer>
   );
 };
