@@ -1,5 +1,5 @@
-import fetch from 'isomorphic-unfetch';
 import querystring from 'querystring';
+import type { SpotifyUser } from '../types';
 
 export const getAccessToken = async (code: string | string[]) => {
   const encoded = Buffer.from(
@@ -38,11 +38,22 @@ export const refreshAccessToken = async (refreshToken: string) => {
   }).then((res) => res.json());
 };
 
-export const getSelf = async (accessToken: string) => {
+export const getSelf = async (
+  accessToken: string
+): Promise<SpotifyUser | void> => {
   return fetch(`${process.env.SPOTIFY_API_ENDPOINT}/me`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-  }).then((res) => res.json());
+  })
+    .then((res) => {
+      if (!res.ok)
+        throw new Error(JSON.stringify({ [res.status]: res.statusText }));
+      return res.json();
+    })
+    .then((data) => data)
+    .catch((error) => {
+      throw new Error(error);
+    });
 };

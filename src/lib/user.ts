@@ -1,8 +1,5 @@
 import { db } from '../services/firestore';
-
-interface SpotifyUser {
-  [key: string]: any;
-}
+import type { SpotifyUser } from '../types';
 
 export const findOrCreateUser = async (
   spotifyUser: SpotifyUser

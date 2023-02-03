@@ -22,15 +22,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           error: 'state_mismatch',
         })
     );
-  } else {
-    removeCookie(res, AUTH_STATE_KEY);
+  }
+  removeCookie(res, AUTH_STATE_KEY);
 
-    try {
-      const { access_token, refresh_token, expires_in } = await getAccessToken(
-        code
-      );
-      const me = await getSelf(access_token);
+  const { access_token, refresh_token, expires_in } = await getAccessToken(
+    code
+  );
+  try {
+    const me = await getSelf(access_token);
 
+    if (me) {
       const user = await findOrCreateUser(me);
       const session = {
         accessToken: access_token,
@@ -40,11 +41,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           id: user.id,
           name: user.display_name,
           email: user.email,
-          avatar:
-            user.images.find((image) => image.height === 300) ||
-            user.images[0].url,
         },
       };
+      if (user.images.length) {
+        session['user']['avatar'] =
+          user.images.find((image) => image.height === 300) ||
+          user.images[0].url;
+      }
 
       if (!process.env.TOKEN_SECRET) return;
 
@@ -53,18 +56,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         secret: process.env.TOKEN_SECRET,
       });
       setCookie(res, { name: 'sessionToken', value: token });
-
       res.redirect('/');
-    } catch (err) {
-      console.error(err);
-
-      res.redirect(
-        '/#' +
-          querystring.stringify({
-            error: 'invalid_token',
-          })
-      );
     }
+  } catch (err) {
+    console.error(err);
+
+    res.redirect(
+      '/#' +
+        querystring.stringify({
+          error: 'invalid_token',
+        })
+    );
   }
 };
 

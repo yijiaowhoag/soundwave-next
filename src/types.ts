@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { JWTPayload } from 'jose';
 import { SpotifyAPI } from './services/spotify-api';
 import type { JWT } from './lib/jwt';
-import type { Track, TrackInQueue, Artist } from './__generated__/types';
+import type { Track, TrackInQueue, Artist, Image } from './__generated__/types';
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
@@ -28,6 +28,26 @@ export interface Context {
   res: NextResponse;
   dataSources: { spotifyAPI: SpotifyAPI };
   session: JWT;
+}
+
+export interface SpotifyUser {
+  id: string;
+  country: string;
+  display_name: string;
+  email: string;
+  explicit_content: ExplicitContent;
+  external_urls: ExternalUrls;
+  href: string;
+  images: Image[];
+  product: Subscription;
+  uri: string;
+}
+interface ExplicitContent {
+  filter_enabled: boolean;
+  filter_locked: boolean;
+}
+interface ExternalUrls {
+  spotify: string;
 }
 
 export type PreviewTrack = Omit<Track, 'artists'> & {

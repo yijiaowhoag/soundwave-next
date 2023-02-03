@@ -6,6 +6,7 @@ import {
   AddTrackInput,
   RemoveTrackInput,
 } from '../apollo/entities/Track';
+import type { SpotifyUser } from '../types';
 
 const serviceAccount = JSON.parse(
   process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
@@ -53,7 +54,7 @@ const getUser = async (userId: string) => {
   return (await docDataPoint<User>(`users/${userId}`).get()).data();
 };
 
-const createUser = async (data) => {
+const createUser = async (data: SpotifyUser) => {
   const userRef = docDataPoint<User>(`users/${data.id}`);
   await userRef.set(data, { merge: true });
 
