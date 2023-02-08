@@ -1,0 +1,32 @@
+query UserTopItems($offset: Int, $limit: Int) {
+  userTopItems(offset: $offset, limit: $limit) {
+    topTracks {
+      id
+      name
+      album {
+        images {
+          url
+          width
+          height
+        }
+      }
+      artists {
+        id
+        name
+      }
+      duration_ms
+      uri
+    }
+    topArtists {
+      id
+      name
+      genres
+      images {
+        url
+        width
+        height
+      }
+      uri
+    }
+  }
+}

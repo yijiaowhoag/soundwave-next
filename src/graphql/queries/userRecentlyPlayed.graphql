@@ -1,5 +1,5 @@
-query UserTopTracks($offset: Int, $limit: Int) {
-  userTopTracks(offset: $offset, limit: $limit) {
+query UserRecentlyPlayed($before: Int, $after: Int, $limit: Int) {
+  userRecentlyPlayed(before: $before, after: $after, limit: $limit) {
     id
     name
     album {
