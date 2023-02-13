@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import { Image } from './Image';
+import { Search } from '../resolvers/search';
 
 enum Subscription {
   FREE = 'free',
@@ -28,4 +29,7 @@ export class User {
 
   @Field(() => Subscription, { nullable: true })
   product?: Subscription;
+
+  @Field(() => [Search])
+  searches: Search[];
 }

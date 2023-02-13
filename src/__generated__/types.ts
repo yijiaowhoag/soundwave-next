@@ -103,13 +103,20 @@ export type ImageInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addSearch: Scalars['Boolean'];
   addToSession: TrackResponse;
   createSession: Scalars['Boolean'];
   deleteSession: Scalars['Boolean'];
   play: Scalars['Boolean'];
   removeFromSession: Scalars['Boolean'];
+  removeSearch: Scalars['Boolean'];
   repeat: Scalars['Boolean'];
   shuffle: Scalars['Boolean'];
+};
+
+
+export type MutationAddSearchArgs = {
+  seed: SeedInput;
 };
 
 
@@ -140,6 +147,11 @@ export type MutationPlayArgs = {
 export type MutationRemoveFromSessionArgs = {
   sessionId: Scalars['String'];
   track: RemoveTrackInput;
+};
+
+
+export type MutationRemoveSearchArgs = {
+  searchId: Scalars['String'];
 };
 
 
@@ -216,6 +228,29 @@ export enum RepeatMode {
   Track = 'track'
 }
 
+export type Search = {
+  __typename?: 'Search';
+  id: Scalars['ID'];
+  imageUrl: Scalars['String'];
+  name: Scalars['String'];
+  timestamp: Scalars['String'];
+  type: SearchType;
+};
+
+/** Item types to search across */
+export enum SearchType {
+  Album = 'Album',
+  Artist = 'Artist',
+  Track = 'Track'
+}
+
+export type SeedInput = {
+  id: Scalars['ID'];
+  imageUrl: Scalars['String'];
+  name: Scalars['String'];
+  type: SearchType;
+};
+
 export type Session = {
   __typename?: 'Session';
   description?: Maybe<Scalars['String']>;
@@ -266,7 +301,15 @@ export type User = {
   id: Scalars['ID'];
   images: Array<Image>;
   product?: Maybe<Subscription>;
+  searches: Array<Search>;
 };
+
+export type AddSearchMutationVariables = Exact<{
+  seed: SeedInput;
+}>;
+
+
+export type AddSearchMutation = { __typename?: 'Mutation', addSearch: boolean };
 
 export type AddTrackMutationVariables = Exact<{
   sessionId: Scalars['String'];
@@ -299,6 +342,13 @@ export type PlayMutationVariables = Exact<{
 
 
 export type PlayMutation = { __typename?: 'Mutation', play: boolean };
+
+export type RemoveSearchMutationVariables = Exact<{
+  searchId: Scalars['String'];
+}>;
+
+
+export type RemoveSearchMutation = { __typename?: 'Mutation', removeSearch: boolean };
 
 export type RemoveTrackMutationVariables = Exact<{
   sessionId: Scalars['String'];
@@ -381,6 +431,37 @@ export type UserTopTracksQueryVariables = Exact<{
 export type UserTopTracksQuery = { __typename?: 'Query', userTopTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
 
 
+export const AddSearchDocument = gql`
+    mutation AddSearch($seed: SeedInput!) {
+  addSearch(seed: $seed)
+}
+    `;
+export type AddSearchMutationFn = Apollo.MutationFunction<AddSearchMutation, AddSearchMutationVariables>;
+
+/**
+ * __useAddSearchMutation__
+ *
+ * To run a mutation, you first call `useAddSearchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddSearchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addSearchMutation, { data, loading, error }] = useAddSearchMutation({
+ *   variables: {
+ *      seed: // value for 'seed'
+ *   },
+ * });
+ */
+export function useAddSearchMutation(baseOptions?: Apollo.MutationHookOptions<AddSearchMutation, AddSearchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddSearchMutation, AddSearchMutationVariables>(AddSearchDocument, options);
+      }
+export type AddSearchMutationHookResult = ReturnType<typeof useAddSearchMutation>;
+export type AddSearchMutationResult = Apollo.MutationResult<AddSearchMutation>;
+export type AddSearchMutationOptions = Apollo.BaseMutationOptions<AddSearchMutation, AddSearchMutationVariables>;
 export const AddTrackDocument = gql`
     mutation AddTrack($sessionId: String!, $track: AddTrackInput!) {
   addToSession(sessionId: $sessionId, track: $track) {
@@ -526,6 +607,37 @@ export function usePlayMutation(baseOptions?: Apollo.MutationHookOptions<PlayMut
 export type PlayMutationHookResult = ReturnType<typeof usePlayMutation>;
 export type PlayMutationResult = Apollo.MutationResult<PlayMutation>;
 export type PlayMutationOptions = Apollo.BaseMutationOptions<PlayMutation, PlayMutationVariables>;
+export const RemoveSearchDocument = gql`
+    mutation RemoveSearch($searchId: String!) {
+  removeSearch(searchId: $searchId)
+}
+    `;
+export type RemoveSearchMutationFn = Apollo.MutationFunction<RemoveSearchMutation, RemoveSearchMutationVariables>;
+
+/**
+ * __useRemoveSearchMutation__
+ *
+ * To run a mutation, you first call `useRemoveSearchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveSearchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeSearchMutation, { data, loading, error }] = useRemoveSearchMutation({
+ *   variables: {
+ *      searchId: // value for 'searchId'
+ *   },
+ * });
+ */
+export function useRemoveSearchMutation(baseOptions?: Apollo.MutationHookOptions<RemoveSearchMutation, RemoveSearchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveSearchMutation, RemoveSearchMutationVariables>(RemoveSearchDocument, options);
+      }
+export type RemoveSearchMutationHookResult = ReturnType<typeof useRemoveSearchMutation>;
+export type RemoveSearchMutationResult = Apollo.MutationResult<RemoveSearchMutation>;
+export type RemoveSearchMutationOptions = Apollo.BaseMutationOptions<RemoveSearchMutation, RemoveSearchMutationVariables>;
 export const RemoveTrackDocument = gql`
     mutation RemoveTrack($sessionId: String!, $track: RemoveTrackInput!) {
   removeFromSession(sessionId: $sessionId, track: $track)

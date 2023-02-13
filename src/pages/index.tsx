@@ -1,7 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useRecommendationsLazyQuery } from '../__generated__/types';
+import {
+  useSelfQuery,
+  useRecommendationsLazyQuery,
+} from '../__generated__/types';
 import Layout from '../components/shared/Layout';
+import SearchHistory from '../components/SearchHistory';
 import SearchSelect from '../components/Search/SearchSelect';
 import AudioFilters from '../components/SearchResults/AudioFilters';
 import SearchResults from '../components/SearchResults';
@@ -38,6 +42,7 @@ const Index = () => {
   const [seeds, setSeeds] = useState<string[]>([]);
   const [filters, setFilters] = useState({});
 
+  const { data: currUserData } = useSelfQuery();
   const [recommend, { data, loading }] = useRecommendationsLazyQuery();
 
   useEffect(() => {
@@ -48,22 +53,22 @@ const Index = () => {
     }
   }, [seeds, filters]);
 
-  useEffect(() => {
-    recommend({ variables: { seeds, filters } });
-  }, [seeds, filters]);
-
   return (
     <Layout>
-      <div ref={boundingBoxRef} style={{ height: '100vh', overflow: 'scroll' }}>
+      <div ref={boundingBoxRef}>
         <SearchBarContainer>
           <SearchSelect onUpdateSeeds={(updated) => setSeeds(updated)} />
         </SearchBarContainer>
-        <ResultsContainer active={!!data?.recommendations}>
-          <SearchResults tracks={data?.recommendations} />
-          <AudioFilters
-            onChange={(filter) => setFilters({ ...filters, ...filter })}
-          />
-        </ResultsContainer>
+        {data?.recommendations ? (
+          <ResultsContainer active={!!data?.recommendations}>
+            <SearchResults tracks={data?.recommendations} />
+            <AudioFilters
+              onChange={(filter) => setFilters({ ...filters, ...filter })}
+            />
+          </ResultsContainer>
+        ) : currUserData?.currUser ? (
+          <SearchHistory recentSearches={currUserData.currUser.searches} />
+        ) : null}
       </div>
     </Layout>
   );

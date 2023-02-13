@@ -1,3 +1,0 @@
-mutation UpdateRecentSearches($seeds: [SeedInput]! = []) {
-  updateRecentSearches(seeds: $seeds)
-}

@@ -6,6 +6,7 @@ import {
   AddTrackInput,
   RemoveTrackInput,
 } from '../apollo/entities/Track';
+import { SeedInput } from '../apollo/resolvers/search';
 import type { SpotifyUser } from '../types';
 
 const serviceAccount = JSON.parse(
@@ -45,6 +46,8 @@ const docDataPoint = <T>(docPath: string) => {
     get: async () => docRef.get(),
     set: async (data: T, options?: FirebaseFirestore.SetOptions) =>
       docRef.set(data, options),
+    update: async (data: FirebaseFirestore.UpdateData<T>) =>
+      docRef.update(data),
     delete: async () => docRef.delete(),
     docRef,
   };
@@ -56,7 +59,7 @@ const getUser = async (userId: string) => {
 
 const createUser = async (data: SpotifyUser) => {
   const userRef = docDataPoint<User>(`users/${data.id}`);
-  await userRef.set(data, { merge: true });
+  await userRef.set({ ...data, searches: [] }, { merge: true });
 
   return (await userRef.get()).data();
 };
@@ -104,6 +107,33 @@ const removeTrackFromSession = async (sessionId: string, trackId: string) => {
   return await docDataPoint(`sessions/${sessionId}/queue/${trackId}`).delete();
 };
 
+const addRecentSearch = async (userId: string, search: SeedInput) => {
+  const timestamp = admin.firestore.FieldValue.serverTimestamp();
+
+  return await docDataPoint<User>(`users/${userId}`).update({
+    searches: admin.firestore.FieldValue.arrayUnion({
+      ...search,
+      timestamp: new Date(Date.now()),
+    }),
+  });
+};
+
+const removeRecentSearch = async (userId: string, searchId: string) => {
+  const userRef = docDataPoint<User>(`users/${userId}`);
+  const { searches } = (await userRef.get()).data();
+  const removed = searches.find((search) => search.id === searchId);
+
+  return await userRef.update({
+    searches: admin.firestore.FieldValue.arrayRemove(removed),
+  });
+};
+
+const clearSearchHistory = async (userId: string) => {
+  return await docDataPoint<User>(`users/${userId}`).update({
+    searches: [],
+  });
+};
+
 const db = {
   getUser,
   createUser,
@@ -113,6 +143,9 @@ const db = {
   deleteSession,
   addTrackToSession,
   removeTrackFromSession,
+  addRecentSearch,
+  removeRecentSearch,
+  clearSearchHistory,
 };
 
 export { db };

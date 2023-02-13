@@ -11,6 +11,16 @@ const config: CodegenConfig = {
         'typescript-operations',
         'typescript-react-apollo',
       ],
+      config: {
+        enumAsTypes: true,
+        enumValues: {
+          SearchType: {
+            album: 'Album',
+            artist: 'Artist',
+            track: 'Track',
+          },
+        },
+      },
     },
   },
 };

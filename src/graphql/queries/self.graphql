@@ -1,0 +1,19 @@
+query Self {
+  currUser {
+    id
+    display_name
+    email
+    images {
+      url
+      width
+      height
+    }
+    searches {
+      id
+      name
+      type
+      imageUrl
+      timestamp
+    }
+  }
+}

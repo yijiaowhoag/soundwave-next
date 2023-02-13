@@ -9,7 +9,11 @@ import type {
   OptionsOrGroups,
   GroupBase,
 } from 'react-select';
-import { SearchDocument, Track } from '../../__generated__/types';
+import {
+  useRemoveSearchMutation,
+  SearchDocument,
+  Track,
+} from '../../__generated__/types';
 import CustomValue from './CustomValue';
 import Option from './Option';
 import type { OptionType } from './Option';
@@ -24,7 +28,7 @@ const SearchSelectContainer = styled.div`
 const ValuesContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  padding-left: 1.5rem;
+  padding-left: 2.5rem;
 `;
 
 const customStyles: StylesConfig<OptionType> = {
@@ -44,15 +48,15 @@ const customStyles: StylesConfig<OptionType> = {
     border: 0,
     borderRadius: 0,
     boxShadow: 'none',
-    paddingLeft: '1rem',
+    paddingLeft: '2rem',
     fontWeight: 'bold',
     fontSize: 72,
   }),
 
   menu: (base) => ({
     ...base,
-    left: '1.5rem',
-    width: 'calc(100% - 1.5rem)',
+    left: '2.5rem',
+    width: 'calc(100% - 2.5rem)',
     marginTop: 0,
     border: `1.5px solid ${theme.colors.lightGreen}`,
     borderRadius: 0,
@@ -71,6 +75,11 @@ const customStyles: StylesConfig<OptionType> = {
     fontSize: 72,
     opacity: 0.5,
   }),
+
+  valueContainer: (base) => ({
+    ...base,
+    padding: 0,
+  }),
 };
 
 interface CustomAsyncSelectProps {
@@ -85,6 +94,7 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
   onChange,
 }) => {
   const client = useApolloClient();
+  const [removeSearch] = useRemoveSearchMutation();
 
   const getAsyncOptions = async (
     inputValue: string
@@ -113,6 +123,11 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
   const debouncedLoadOptions = debounce(loadOptions, 1000);
 
   const handleRemoveValue = (removedValue: OptionType) => {
+    removeSearch({
+      variables: {
+        searchId: removedValue.value,
+      },
+    });
     onChange(value.filter((v) => v.value !== removedValue.value));
   };
 

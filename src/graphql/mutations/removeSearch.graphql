@@ -1,0 +1,3 @@
+mutation RemoveSearch($searchId: String!) {
+  removeSearch(searchId: $searchId)
+}
