@@ -5,7 +5,7 @@ import {
   SessionsDocument,
 } from '../../__generated__/types';
 import { FillButton } from '../shared/Button';
-import InputField from './InputField';
+import InputField from '../shared/InputField';
 
 interface SessionFormProps {
   onClose: () => void;

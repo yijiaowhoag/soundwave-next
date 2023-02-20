@@ -1,0 +1,3 @@
+mutation GenerateUploadUrl($filename: String!, $mimetype: String!) {
+  generateUploadUrl(filename: $filename, mimetype: $mimetype)
+}

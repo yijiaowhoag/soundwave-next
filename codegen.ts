@@ -1,4 +1,7 @@
+import * as dotenv from 'dotenv';
 import { CodegenConfig } from '@graphql-codegen/cli';
+
+dotenv.config();
 
 const config: CodegenConfig = {
   overwrite: true,
@@ -20,6 +23,8 @@ const config: CodegenConfig = {
             track: 'Track',
           },
         },
+        FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+        FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
       },
     },
   },

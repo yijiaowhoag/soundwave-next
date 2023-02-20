@@ -4,9 +4,9 @@ import styled from 'styled-components';
 import { HiHome, HiOutlineHome } from 'react-icons/hi';
 import { RiSearch2Fill, RiSearch2Line } from 'react-icons/ri';
 import { BsPlusCircle, BsSuitHeartFill, BsSuitHeart } from 'react-icons/bs';
-// import { useMeQuery } from '../../__generated__/types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSelfQuery } from '../../__generated__/types';
 import Modal from './Modal';
+import ProfileForm from '../ProfileForm';
 import SessionForm from '../SessionForm';
 import theme from '../../theme';
 
@@ -110,12 +110,32 @@ const Logo = styled.div`
 `;
 
 const User = styled.div`
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   padding: 0.25rem 1.5rem 0.25rem 0.75rem;
   cursor: pointer;
+
+  .underlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    background: ${({ theme }) =>
+      `linear-gradient(to right, ${theme.colors.lightGreen75}, ${theme.colors.darkest})`};
+    opacity: 0;
+  }
+
+  &:hover {
+    .underlay {
+      opacity: 0.8;
+      transition: opacity 1s ${({ theme }) => theme.animations.bezier};
+    }
+  }
 `;
 
 const UserPhoto = styled.img`
@@ -123,18 +143,15 @@ const UserPhoto = styled.img`
   height: 40px;
   margin-right: 0.75rem;
   border-radius: 10px;
+  object-fit: cover;
 `;
 
 const DisplayName = styled.h4``;
 
 const Navbar: React.FC = () => {
-  const auth = useAuth();
   const router = useRouter();
 
-  const logout = async () => {
-    await fetch('/api/auth/logout');
-    router.push('/auth/login');
-  };
+  const { data } = useSelfQuery();
 
   return (
     <Sidebar>
@@ -142,11 +159,27 @@ const Navbar: React.FC = () => {
         <Logo />
       </LogoBkg>
       <Nav>
-        {auth?.user && (
-          <User>
-            <UserPhoto src={auth.user.avatar} />
-            <DisplayName>{auth.user.name}</DisplayName>
-          </User>
+        {data?.currUser && (
+          <Modal
+            activator={
+              <User>
+                <UserPhoto src={data.currUser.avatar} />
+                <DisplayName>{data.currUser.display_name}</DisplayName>
+                <div className="underlay" />
+              </User>
+            }
+          >
+            {({ closeModal }) => (
+              <ProfileForm
+                initialValues={{
+                  display_name: data.currUser.display_name,
+                  avatar: data.currUser.images[0].url,
+                  email: data.currUser.email,
+                }}
+                onClose={closeModal}
+              />
+            )}
+          </Modal>
         )}
         <Link href="/dashboard" passHref legacyBehavior>
           <NavLink

@@ -19,6 +19,9 @@ export class User {
   id: string;
 
   @Field(() => String)
+  avatar: string;
+
+  @Field(() => String)
   display_name: string;
 
   @Field(() => String)

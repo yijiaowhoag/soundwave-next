@@ -930,6 +930,29 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-3.0.1.tgz#8d724fb280f47d1ff99953aee0c1669b25238c2e"
   integrity sha512-z1CjRjtQyBOYL+5Qr9DdYIfrdLBe746jRTYfaYU6MeXkqp7UfYs/jX16lFFVzZ7PGEJvqZNqYUEtb1mvDww4pA==
 
+"@google-cloud/storage@*":
+  version "6.9.3"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.9.3.tgz#43fa4c9e30785313f68d01e6fde9bdba6d10a695"
+  integrity sha512-ucbHoDvjXlcR/DrJNQlCFnQSaO7pXHTPGs3Gt2TQtPQ+b7Y6DR0ztIt/CEeH+O03I41g9e+T2N1SOOVq5UyaKQ==
+  dependencies:
+    "@google-cloud/paginator" "^3.0.7"
+    "@google-cloud/projectify" "^3.0.0"
+    "@google-cloud/promisify" "^3.0.0"
+    abort-controller "^3.0.0"
+    async-retry "^1.3.3"
+    compressible "^2.0.12"
+    duplexify "^4.0.0"
+    ent "^2.2.0"
+    extend "^3.0.2"
+    gaxios "^5.0.0"
+    google-auth-library "^8.0.1"
+    mime "^3.0.0"
+    mime-types "^2.0.8"
+    p-limit "^3.0.1"
+    retry-request "^5.0.0"
+    teeny-request "^8.0.0"
+    uuid "^8.0.0"
+
 "@google-cloud/storage@^6.5.2":
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.9.1.tgz#8b2d7e24afefcec1e6b4f48c9dfcaf15c5b351a7"
@@ -1771,6 +1794,13 @@
   dependencies:
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/google-cloud__storage@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@types/google-cloud__storage/-/google-cloud__storage-2.3.1.tgz#a5c7fbb095c08b253466c4825d344b0724280eee"
+  integrity sha512-wufpGd8OW+cB+RbE5RivaJQA2EajvfPxbhkyCe7jj7rn5fdMOJdnxvobAhAGe6lgrMjSn4XtwMqDQfz5VvKW0Q==
+  dependencies:
+    "@google-cloud/storage" "*"
 
 "@types/hoist-non-react-statics@*":
   version "3.3.1"
@@ -2799,7 +2829,7 @@ dot-case@^3.0.4:
     no-case "^3.0.4"
     tslib "^2.0.3"
 
-dotenv@^16.0.0:
+dotenv@^16.0.0, dotenv@^16.0.3:
   version "16.0.3"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
   integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==

@@ -3,6 +3,7 @@ query Self {
     id
     display_name
     email
+    avatar
     images {
       url
       width

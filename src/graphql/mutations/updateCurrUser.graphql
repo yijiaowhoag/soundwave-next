@@ -1,0 +1,7 @@
+mutation UpdateCurrUser($updates: UpdateUserInput!) {
+  updateCurrUser(updates: $updates) {
+    id
+    display_name
+    email
+  }
+}

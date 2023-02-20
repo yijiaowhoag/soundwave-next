@@ -107,11 +107,13 @@ export type Mutation = {
   addToSession: TrackResponse;
   createSession: Scalars['Boolean'];
   deleteSession: Scalars['Boolean'];
+  generateUploadUrl: Scalars['String'];
   play: Scalars['Boolean'];
   removeFromSession: Scalars['Boolean'];
   removeSearch: Scalars['Boolean'];
   repeat: Scalars['Boolean'];
   shuffle: Scalars['Boolean'];
+  updateCurrUser: User;
 };
 
 
@@ -134,6 +136,12 @@ export type MutationCreateSessionArgs = {
 
 export type MutationDeleteSessionArgs = {
   sessionId: Scalars['String'];
+};
+
+
+export type MutationGenerateUploadUrlArgs = {
+  filename: Scalars['String'];
+  mimetype: Scalars['String'];
 };
 
 
@@ -164,6 +172,11 @@ export type MutationRepeatArgs = {
 export type MutationShuffleArgs = {
   deviceId: Scalars['String'];
   state: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateCurrUserArgs = {
+  updates: UpdateUserInput;
 };
 
 export type Query = {
@@ -294,8 +307,16 @@ export type TrackResponse = {
   track: TrackInQueue;
 };
 
+export type UpdateUserInput = {
+  avatar?: InputMaybe<Scalars['String']>;
+  display_name?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['String']>;
+  explicit_content?: InputMaybe<Scalars['String']>;
+};
+
 export type User = {
   __typename?: 'User';
+  avatar: Scalars['String'];
   display_name: Scalars['String'];
   email: Scalars['String'];
   id: Scalars['ID'];
@@ -333,6 +354,14 @@ export type DeleteSessionMutationVariables = Exact<{
 
 
 export type DeleteSessionMutation = { __typename?: 'Mutation', deleteSession: boolean };
+
+export type GenerateUploadUrlMutationVariables = Exact<{
+  filename: Scalars['String'];
+  mimetype: Scalars['String'];
+}>;
+
+
+export type GenerateUploadUrlMutation = { __typename?: 'Mutation', generateUploadUrl: string };
 
 export type PlayMutationVariables = Exact<{
   deviceId: Scalars['String'];
@@ -373,6 +402,13 @@ export type ShuffleMutationVariables = Exact<{
 
 
 export type ShuffleMutation = { __typename?: 'Mutation', shuffle: boolean };
+
+export type UpdateCurrUserMutationVariables = Exact<{
+  updates: UpdateUserInput;
+}>;
+
+
+export type UpdateCurrUserMutation = { __typename?: 'Mutation', updateCurrUser: { __typename?: 'User', id: string, display_name: string, email: string } };
 
 export type ArtistQueryVariables = Exact<{
   artistId: Scalars['String'];
@@ -574,6 +610,38 @@ export function useDeleteSessionMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteSessionMutationHookResult = ReturnType<typeof useDeleteSessionMutation>;
 export type DeleteSessionMutationResult = Apollo.MutationResult<DeleteSessionMutation>;
 export type DeleteSessionMutationOptions = Apollo.BaseMutationOptions<DeleteSessionMutation, DeleteSessionMutationVariables>;
+export const GenerateUploadUrlDocument = gql`
+    mutation GenerateUploadUrl($filename: String!, $mimetype: String!) {
+  generateUploadUrl(filename: $filename, mimetype: $mimetype)
+}
+    `;
+export type GenerateUploadUrlMutationFn = Apollo.MutationFunction<GenerateUploadUrlMutation, GenerateUploadUrlMutationVariables>;
+
+/**
+ * __useGenerateUploadUrlMutation__
+ *
+ * To run a mutation, you first call `useGenerateUploadUrlMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateUploadUrlMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateUploadUrlMutation, { data, loading, error }] = useGenerateUploadUrlMutation({
+ *   variables: {
+ *      filename: // value for 'filename'
+ *      mimetype: // value for 'mimetype'
+ *   },
+ * });
+ */
+export function useGenerateUploadUrlMutation(baseOptions?: Apollo.MutationHookOptions<GenerateUploadUrlMutation, GenerateUploadUrlMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateUploadUrlMutation, GenerateUploadUrlMutationVariables>(GenerateUploadUrlDocument, options);
+      }
+export type GenerateUploadUrlMutationHookResult = ReturnType<typeof useGenerateUploadUrlMutation>;
+export type GenerateUploadUrlMutationResult = Apollo.MutationResult<GenerateUploadUrlMutation>;
+export type GenerateUploadUrlMutationOptions = Apollo.BaseMutationOptions<GenerateUploadUrlMutation, GenerateUploadUrlMutationVariables>;
 export const PlayDocument = gql`
     mutation Play($deviceId: String!, $uris: [String!]!, $offset: Int) {
   play(deviceId: $deviceId, uris: $uris, offset: $offset)
@@ -734,6 +802,41 @@ export function useShuffleMutation(baseOptions?: Apollo.MutationHookOptions<Shuf
 export type ShuffleMutationHookResult = ReturnType<typeof useShuffleMutation>;
 export type ShuffleMutationResult = Apollo.MutationResult<ShuffleMutation>;
 export type ShuffleMutationOptions = Apollo.BaseMutationOptions<ShuffleMutation, ShuffleMutationVariables>;
+export const UpdateCurrUserDocument = gql`
+    mutation UpdateCurrUser($updates: UpdateUserInput!) {
+  updateCurrUser(updates: $updates) {
+    id
+    display_name
+    email
+  }
+}
+    `;
+export type UpdateCurrUserMutationFn = Apollo.MutationFunction<UpdateCurrUserMutation, UpdateCurrUserMutationVariables>;
+
+/**
+ * __useUpdateCurrUserMutation__
+ *
+ * To run a mutation, you first call `useUpdateCurrUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCurrUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCurrUserMutation, { data, loading, error }] = useUpdateCurrUserMutation({
+ *   variables: {
+ *      updates: // value for 'updates'
+ *   },
+ * });
+ */
+export function useUpdateCurrUserMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCurrUserMutation, UpdateCurrUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCurrUserMutation, UpdateCurrUserMutationVariables>(UpdateCurrUserDocument, options);
+      }
+export type UpdateCurrUserMutationHookResult = ReturnType<typeof useUpdateCurrUserMutation>;
+export type UpdateCurrUserMutationResult = Apollo.MutationResult<UpdateCurrUserMutation>;
+export type UpdateCurrUserMutationOptions = Apollo.BaseMutationOptions<UpdateCurrUserMutation, UpdateCurrUserMutationVariables>;
 export const ArtistDocument = gql`
     query Artist($artistId: String!, $market: String!) {
   artistDetails(artistId: $artistId, market: $market) {
