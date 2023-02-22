@@ -1,0 +1,3 @@
+mutation UpdateSession($sessionId: String!, $updates: UpdateSessionInput!) {
+  updateSession(sessionId: $sessionId, updates: $updates)
+}

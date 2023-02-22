@@ -12,6 +12,9 @@ export class Session {
   @Field(() => String, { nullable: true })
   description?: string;
 
+  @Field(() => String, { nullable: true })
+  cover?: string;
+
   @Field(() => [TrackInQueue])
   queue: TrackInQueue[];
 }

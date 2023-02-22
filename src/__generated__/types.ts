@@ -129,6 +129,7 @@ export type MutationAddToSessionArgs = {
 
 
 export type MutationCreateSessionArgs = {
+  cover?: InputMaybe<Scalars['String']>;
   description?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
 };
@@ -177,6 +178,12 @@ export type MutationShuffleArgs = {
 
 export type MutationUpdateCurrUserArgs = {
   updates: UpdateUserInput;
+};
+
+
+export type MutationUpdateSessionArgs = {
+  sessionId: Scalars['String'];
+  updates: UpdateSessionInput;
 };
 
 export type Query = {
@@ -266,6 +273,7 @@ export type SeedInput = {
 
 export type Session = {
   __typename?: 'Session';
+  cover?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
@@ -305,6 +313,12 @@ export type TrackInQueue = {
 export type TrackResponse = {
   __typename?: 'TrackResponse';
   track: TrackInQueue;
+};
+
+export type UpdateSessionInput = {
+  cover?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 export type UpdateUserInput = {
@@ -410,6 +424,14 @@ export type UpdateCurrUserMutationVariables = Exact<{
 
 export type UpdateCurrUserMutation = { __typename?: 'Mutation', updateCurrUser: { __typename?: 'User', id: string, display_name: string, email: string } };
 
+export type UpdateSessionMutationVariables = Exact<{
+  sessionId: Scalars['String'];
+  updates: UpdateSessionInput;
+}>;
+
+
+export type UpdateSessionMutation = { __typename?: 'Mutation', updateSession: boolean };
+
 export type ArtistQueryVariables = Exact<{
   artistId: Scalars['String'];
   market: Scalars['String'];
@@ -443,12 +465,12 @@ export type SessionQueryVariables = Exact<{
 }>;
 
 
-export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, description?: string | null, queue: Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp: string, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
+export type SessionQuery = { __typename?: 'Query', session: { __typename?: 'Session', id: string, name: string, description?: string | null, cover?: string | null, queue: Array<{ __typename?: 'TrackInQueue', id: string, name: string, duration_ms: number, uri: string, timestamp: string, artists: Array<{ __typename?: 'Artist', id: string, name: string }>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
 
 export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, name: string, description?: string | null }> };
+export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, name: string, description?: string | null, cover?: string | null }> };
 
 export type UserTopArtistsQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']>;
@@ -837,6 +859,38 @@ export function useUpdateCurrUserMutation(baseOptions?: Apollo.MutationHookOptio
 export type UpdateCurrUserMutationHookResult = ReturnType<typeof useUpdateCurrUserMutation>;
 export type UpdateCurrUserMutationResult = Apollo.MutationResult<UpdateCurrUserMutation>;
 export type UpdateCurrUserMutationOptions = Apollo.BaseMutationOptions<UpdateCurrUserMutation, UpdateCurrUserMutationVariables>;
+export const UpdateSessionDocument = gql`
+    mutation UpdateSession($sessionId: String!, $updates: UpdateSessionInput!) {
+  updateSession(sessionId: $sessionId, updates: $updates)
+}
+    `;
+export type UpdateSessionMutationFn = Apollo.MutationFunction<UpdateSessionMutation, UpdateSessionMutationVariables>;
+
+/**
+ * __useUpdateSessionMutation__
+ *
+ * To run a mutation, you first call `useUpdateSessionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateSessionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateSessionMutation, { data, loading, error }] = useUpdateSessionMutation({
+ *   variables: {
+ *      sessionId: // value for 'sessionId'
+ *      updates: // value for 'updates'
+ *   },
+ * });
+ */
+export function useUpdateSessionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateSessionMutation, UpdateSessionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateSessionMutation, UpdateSessionMutationVariables>(UpdateSessionDocument, options);
+      }
+export type UpdateSessionMutationHookResult = ReturnType<typeof useUpdateSessionMutation>;
+export type UpdateSessionMutationResult = Apollo.MutationResult<UpdateSessionMutation>;
+export type UpdateSessionMutationOptions = Apollo.BaseMutationOptions<UpdateSessionMutation, UpdateSessionMutationVariables>;
 export const ArtistDocument = gql`
     query Artist($artistId: String!, $market: String!) {
   artistDetails(artistId: $artistId, market: $market) {
@@ -1061,6 +1115,7 @@ export const SessionDocument = gql`
     id
     name
     description
+    cover
     queue {
       id
       name
@@ -1114,6 +1169,7 @@ export const SessionsDocument = gql`
     id
     name
     description
+    cover
   }
 }
     `;

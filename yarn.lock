@@ -1700,10 +1700,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@szhsin/react-menu@^3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@szhsin/react-menu/-/react-menu-3.3.1.tgz#c974c887bfcf94aca4c4cc07688a3c20d4e952bd"
-  integrity sha512-e8vK+N1YWwTdYXElvRRf5GIImtcDecqTCzpAa0DkGAknKwfQwtQtUnBn+DECodwsWi5H5ONKTU+kn0qJ70hEYQ==
+"@szhsin/react-menu@^3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@szhsin/react-menu/-/react-menu-3.5.1.tgz#6b27ef3da7c2218d6772bc2aa0522edf4a96b3a9"
+  integrity sha512-bTCfVNBSReG4+mnbN8n2OQWZ3DRPlJgMIBJFepPfDLiRzNSe5lbZ8Z5Kjiv9nuPLHOu3jSaybxgYJj/Dn8n75Q==
   dependencies:
     prop-types "^15.7.2"
     react-transition-state "^1.1.5"

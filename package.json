@@ -17,7 +17,7 @@
     "@apollo/server": "^4.3.0",
     "@as-integrations/next": "^1.2.0",
     "@graphql-tools/schema": "^9.0.12",
-    "@szhsin/react-menu": "^3.3.1",
+    "@szhsin/react-menu": "^3.5.1",
     "cookie": "^0.4.1",
     "debounce-promise": "^3.1.2",
     "deepmerge": "^4.2.2",

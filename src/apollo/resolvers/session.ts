@@ -6,6 +6,7 @@ import {
   Ctx,
   Field,
   ObjectType,
+  InputType,
 } from 'type-graphql';
 import { Session } from '../entities/Session';
 import {
@@ -13,19 +14,20 @@ import {
   AddTrackInput,
   RemoveTrackInput,
 } from '../entities/Track';
-import { db } from '../../services/firestore';
+import { db } from '../../services/firebase/db';
+import { getPublicUrl } from '../../services/firebase/storage';
 import type { Context } from '../../types';
 
-@ObjectType()
-export class SessionResponse {
-  @Field()
-  session: Session;
-}
+@InputType()
+class UpdateSessionInput {
+  @Field({ nullable: true })
+  name?: string;
 
-@ObjectType()
-export class TrackResponse {
-  @Field()
-  track: TrackInQueue;
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  cover?: string;
 }
 
 @Resolver(Session)
@@ -44,13 +46,28 @@ export class SessionResolver {
   async createSession(
     @Arg('name') name: string,
     @Arg('description', { nullable: true }) description: string,
+    @Arg('cover', { nullable: true }) cover: string,
     @Ctx() ctx: Context
   ): Promise<boolean> {
     await db.createSession({
       name,
       description,
+      cover,
       creatorId: ctx.session.user.id,
     });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async updateSession(
+    @Arg('sessionId') sessionId: string,
+    @Arg('updates', () => UpdateSessionInput) updates: UpdateSessionInput
+  ): Promise<boolean> {
+    if (Object(updates).hasOwnProperty('cover')) {
+      const publicUrl = await getPublicUrl(updates.cover);
+      updates['cover'] = publicUrl;
+    }
 
     return true;
   }
@@ -83,4 +100,16 @@ export class SessionResolver {
 
     return true;
   }
+}
+
+@ObjectType()
+export class SessionResponse {
+  @Field()
+  session: Session;
+}
+
+@ObjectType()
+export class TrackResponse {
+  @Field()
+  track: TrackInQueue;
 }

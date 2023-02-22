@@ -1,11 +1,11 @@
 import Router from 'next/router';
 import styled from 'styled-components';
-import { TiDelete } from 'react-icons/ti';
-import { BsPlayCircleFill } from 'react-icons/bs';
+import { IoCloseCircle } from 'react-icons/io5';
 import {
   useDeleteSessionMutation,
   SessionsDocument,
 } from '../../__generated__/types';
+import EditBtn, { EditIcon } from '../SessionForm/EditBtn';
 
 const Overlay = styled.div`
   position: absolute;
@@ -13,42 +13,91 @@ const Overlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   background: ${({ theme }) =>
     `linear-gradient(to bottom, transparent, ${theme.colors.lightGreen30})`};
   opacity: 0;
 `;
 
-const PlayIconWrapper = styled.div`
-  position: absolute;
-  bottom: 2.5rem;
-  left: 50%;
-  transform: translate(-50%);
-  width: 64px;
-  height: 64px;
-  border-radius: 100%;
-  box-shadow: 0 10px 15px ${({ theme }) => theme.shadow.dark};
-  background-color: white;
-  opacity: 0;
+const ImageWrapper = styled.div`
+  width: 100%;
+  height: 9rem;
+  border-radius: 10px 10px 0 0;
+`;
 
-  .play-icon {
+const Image = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+`;
+
+const DefaultImage = styled.div`
+  position: relative;
+  height: 100%;
+  border-radius: 10px 10px 0 0;
+  background-color: ${({ theme }) => theme.colors.lightGreen30};
+
+  img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 60%;
+  }
+
+  .underlay {
+    position: absolute;
     width: 100%;
     height: 100%;
-    fill: ${({ theme }) => theme.colors.spotifyGreen};
-    cursor: pointer;
+    border-radius: 6px;
+  }
+`;
+
+const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 8rem;
+`;
+
+const SessionName = styled.h3`
+  margin: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 18px;
+`;
+
+const SessionDesp = styled.p`
+  margin: 0 1rem;
+  opacity: 0.5;
+
+  &.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: keep-all;
   }
 `;
 
 const Card = styled.div`
   position: relative;
   width: ${({ theme }) => theme.columns(2)};
-  height: ${({ theme }) => theme.columns(2.5)};
+  height: 18rem;
   margin-right: 2rem;
-  border-radius: 12px;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 10px 5px 10px 5px ${({ theme }) => theme.colors.darkGreen};
+  border-radius: 10px 0 10px 10px;
+  background-color: ${({ theme }) => theme.colors.lightGreen10};
+  box-shadow: 10px 5px 10px 5px ${({ theme }) => theme.shadow.dark};
   cursor: pointer;
+
+  ${EditIcon} {
+    position: absolute;
+    bottom: 2rem;
+    right: 1.5rem;
+    z-index: 2;
+    width: 55px;
+    height: 55px;
+    opacity: 0;
+  }
 
   &:hover {
     ${Overlay} {
@@ -56,35 +105,29 @@ const Card = styled.div`
       transition: opacity 0.8s ${({ theme }) => theme.animations.bezier};
     }
 
-    ${PlayIconWrapper} {
+    ${EditIcon} {
       opacity: 1;
-      bottom: 2rem;
+      bottom: 1.5rem;
       transition: opacity 0.8s ${({ theme }) => theme.animations.bezier},
         bottom 0.8s ${({ theme }) => theme.animations.bezier};
     }
   }
 `;
 
-const SessionName = styled.h3`
-  position: relative;
-  z-index: 1;
-`;
-
-const SessionDesp = styled.p`
-  margin-right: 1rem;
-  opacity: 0.5;
-`;
-
-const DeleteIconWrapper = styled.div`
+const DeleteIcon = styled.span`
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
 
-  .delete-icon {
-    width: 28px;
-    height: 28px;
+  .icon {
+    width: 100%;
+    height: 100%;
     fill: ${({ theme }) => theme.colors.lightGreen};
-    cursor: pointer;
+    filter: ${({ theme }) =>
+      `drop-shadow(3px 5px 3px ${theme.shadow.darkest})`};
   }
 `;
 
@@ -92,9 +135,15 @@ interface SessionCardProps {
   id: string;
   name: string;
   description?: string;
+  cover?: string;
 }
 
-const SessionCard: React.FC<SessionCardProps> = ({ id, name, description }) => {
+const SessionCard: React.FC<SessionCardProps> = ({
+  id,
+  name,
+  description,
+  cover,
+}) => {
   const [deleteSession] = useDeleteSessionMutation({
     variables: { sessionId: id },
     refetchQueries: [{ query: SessionsDocument }],
@@ -107,25 +156,33 @@ const SessionCard: React.FC<SessionCardProps> = ({ id, name, description }) => {
     >
       <Card>
         <Overlay />
-        <SessionName>{name}</SessionName>
-        {description && <SessionDesp>{description}</SessionDesp>}
-        <DeleteIconWrapper>
-          <TiDelete
+        <ImageWrapper>
+          {cover ? (
+            <Image src={cover} />
+          ) : (
+            <DefaultImage>
+              <img src="/default-session-cover.png" />
+              <div className="underlay" />
+            </DefaultImage>
+          )}
+        </ImageWrapper>
+        <CardContent>
+          <SessionName>{name}</SessionName>
+          {description && (
+            <SessionDesp className="line-clamp">{description}</SessionDesp>
+          )}
+          <div className="underlay" />
+        </CardContent>
+        <DeleteIcon>
+          <IoCloseCircle
             onClick={(e) => {
               e.stopPropagation();
               deleteSession({ variables: { sessionId: id } });
             }}
-            className="delete-icon"
+            className="icon"
           />
-        </DeleteIconWrapper>
-        <PlayIconWrapper>
-          <BsPlayCircleFill
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="play-icon"
-          />
-        </PlayIconWrapper>
+        </DeleteIcon>
+        <EditBtn sessionId={id} initialValues={{ name, description, cover }} />
       </Card>
     </div>
   );

@@ -35,12 +35,13 @@ const TrackContent = styled.div`
   }
 `;
 
-const HoverBkg = styled.div<{ isCurrent: boolean }>`
+const Underlay = styled.div<{ isCurrent: boolean }>`
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: -1;
   background-color: ${({ theme }) => theme.colors.lightGreen30};
   opacity: 0;
 `;
@@ -97,19 +98,19 @@ const TrackContainer = styled.div<{
   ${({ isSelected, theme }) =>
     isSelected &&
     css`
-      ${HoverBkg} {
+      ${Underlay} {
         opacity: 0.8;
-        transition: opacity 1s ${({ theme }) => theme.animations.bezier};
+        transition: opacity 1s ${theme.animations.bezier};
       }
 
       ${IconWrapper} {
         opacity: 1;
-        transition: opacity 1s ${({ theme }) => theme.animations.bezier};
+        transition: opacity 1s ${theme.animations.bezier};
       }
     `}
 
   &:hover {
-    ${HoverBkg} {
+    ${Underlay} {
       opacity: 0.8;
       transition: opacity 1s ${({ theme }) => theme.animations.bezier};
     }
@@ -118,12 +119,6 @@ const TrackContainer = styled.div<{
       opacity: 1;
       transition: opacity 1s ${({ theme }) => theme.animations.bezier};
     }
-  }
-
-  ${IconWrapper},
-  ${TrackImage},
-  ${TrackContent} {
-    z-index: 1;
   }
 `;
 
@@ -249,7 +244,7 @@ const Track: React.FC<TrackProps> = ({
           />
         </div>
       </TrackContent>
-      <HoverBkg isCurrent={isCurrent} />
+      <Underlay isCurrent={isCurrent} />
     </TrackContainer>
   );
 };

@@ -3,6 +3,7 @@ query Session($sessionId: String!) {
     id
     name
     description
+    cover
     queue {
       id
       name

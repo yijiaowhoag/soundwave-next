@@ -45,7 +45,7 @@ const MenuButton = styled.div`
 
 const StyledMenu = styled(ControlledMenu)`
   ${menuSelector.name} {
-    width: 200px;
+    width: 240px;
     border-radius: 5px;
     border: 1px solid ${({ theme }) => theme.colors.green};
     box-shadow: 0 10px 20px ${({ theme }) => theme.shadow.darkest};

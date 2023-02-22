@@ -1,4 +1,4 @@
-import React, { cloneElement, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Portal from './Portal';
 
@@ -26,17 +26,37 @@ const ContentContainer = styled.div`
   z-index: 100;
 `;
 
-const ModalButton: React.FC<ModalButtonProps> = ({ children, openModal }) =>
-  cloneElement(children, {
-    onClick: openModal,
-  });
+const ModalButton: React.FC<ModalButtonProps> = ({ children, openModal }) => {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      openModal();
+    },
+    [openModal]
+  );
+
+  return React.Children.only(
+    React.cloneElement(children, { onClick: handleClick })
+  );
+};
 
 const Modal: React.FC<ModalProps> = ({ activator, children }) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
   const [open, setOpen] = useState<boolean>(false);
 
-  const openModal = () => setOpen(true);
+  const openModal = useCallback(() => setOpen(true), []);
+  const closeModal = useCallback(() => setOpen(false), []);
 
-  const closeModal = () => setOpen(false);
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (e.target === overlayRef.current) {
+        closeModal();
+      }
+    },
+    [closeModal]
+  );
 
   return (
     <>
@@ -44,12 +64,8 @@ const Modal: React.FC<ModalProps> = ({ activator, children }) => {
       <Portal>
         {open && (
           <Overlay
-            id="modal-overlay"
-            onClick={(e) => {
-              if ((e.target as Element).id === 'modal-overlay') {
-                closeModal();
-              }
-            }}
+            ref={overlayRef}
+            onClick={handleOverlayClick}
             role="button"
             aria-label="Overlay"
           >

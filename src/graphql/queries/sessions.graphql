@@ -3,5 +3,6 @@ query Sessions {
     id
     name
     description
+    cover
   }
 }

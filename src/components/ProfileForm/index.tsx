@@ -58,8 +58,13 @@ const AvatarOverlay = styled.label`
   background-color: ${({ theme }) => theme.colors.darkGreen};
   opacity: 0;
 
-  .edit-icon path {
-    fill: white;
+  .edit-icon {
+    margin-bottom: 5px;
+
+    path {
+      fill: transparent;
+      stroke: white;
+    }
   }
 `;
 
@@ -167,11 +172,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         {({ isSubmitting, setFieldValue, values, dirty }) => (
           <Form>
             <AvatarWrapper>
-              {avatarPreview ? (
-                <AvatarImage src={avatarPreview} alt="Avatar" />
-              ) : (
-                <AvatarImage src="/default-avatar.png" alt="Avatar" />
-              )}
               <AvatarOverlay>
                 <AvatarInput
                   type="file"
@@ -187,9 +187,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                     }
                   }}
                 />
-                <GrEdit className="edit-icon" size={36} color="#fff" />
+                <GrEdit className="edit-icon" size={32} />
                 <span>Choose Photo</span>
               </AvatarOverlay>
+              {avatarPreview ? (
+                <AvatarImage src={avatarPreview} alt="Avatar" />
+              ) : (
+                <AvatarImage src="/default-avatar.png" alt="Avatar" />
+              )}
             </AvatarWrapper>
             <InputField label="Display Name" name="display_name" />
             <InputField

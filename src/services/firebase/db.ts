@@ -91,6 +91,12 @@ const createSession = async (data) => {
   );
 };
 
+const updateSession = async (sessionId: string, data) => {
+  return await docDataPoint<Session>(`sessions/${sessionId}`).update(
+    Object.assign({}, data)
+  );
+};
+
 const deleteSession = async (sessionId: string) =>
   docDataPoint<Session>(`sessions/${sessionId}`).delete();
 
@@ -142,6 +148,7 @@ const db = {
   getUserSessions,
   getSessionById,
   createSession,
+  updateSession,
   deleteSession,
   addTrackToSession,
   removeTrackFromSession,

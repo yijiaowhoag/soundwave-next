@@ -4,6 +4,7 @@ import type { GetServerSideProps } from 'next';
 import { useSessionQuery, usePlayMutation } from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
 import Layout from '../../components/shared/Layout';
+import EditBtn, { EditIcon } from '../../components/SessionForm/EditBtn';
 import Playlist from '../../components/Playlist';
 import Player from '../../components/Player';
 
@@ -16,42 +17,78 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
 
-  > div:last-child {
-    display: flex;
-    flex: 1;
+  .underlay {
+    position: absolute;
+    top: ${({ theme }) => theme.columns(1)};
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${({ theme }) =>
+      `linear-gradient(to bottom, transparent 10%, ${theme.colors.lightGreen10} 25%, ${theme.colors.green})`};
   }
+`;
+
+const Header = styled.div`
+  border-bottom: 1.5px solid ${({ theme }) => theme.colors.green};
 `;
 
 const SessionInfo = styled.div`
+  position: relative;
   display: flex;
-  flex-direction: column;
-  padding: 1rem 3rem 0;
-  border-bottom: 1.5px solid ${({ theme }) => theme.colors.green};
+  height: ${({ theme }) => theme.columns(2.5)};
 
-  h1 {
-    margin: 0;
-    margin-right: 0.5em;
-    font-size: 3.5rem;
-    font-weight: bold;
-  }
+  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem 0;
 
-  p {
-    margin-right: 1rem;
-    opacity: 0.5;
+    h1,
+    p {
+      margin: 1em 0.5em 0 0;
+      cursor: pointer;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: bold;
+    }
+
+    p {
+      opacity: 0.5;
+    }
   }
 `;
 
-const SessionHead = styled.div`
+const Cover = styled.div`
+  width: ${({ theme }) => theme.columns(2.5)};
+  padding: 1.5rem;
+
+  img {
+    width: 100%;
+    height: 100%;
+    box-shadow: 8px 10px 10px ${({ theme }) => theme.shadow.darkest};
+    object-fit: cover;
+  }
+`;
+
+const ActionBar = styled.div`
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: center;
-  margin: 0.5rem 0;
+  padding: 0 1.5rem 1rem 1.5rem;
+  font-size: 16px;
+
+  .icon-wrapper {
+    margin-right: 1em;
+  }
 `;
 
 const PlayIconWrapper = styled.div<{ enabled: boolean }>`
-  width: 55px;
-  height: 55px;
+  width: 3em;
+  height: 3em;
   border-radius: 100%;
-  box-shadow: 0 10px 15px ${({ theme }) => theme.shadow.dark};
+  box-shadow: 5px 10px 15px ${({ theme }) => theme.shadow.darkest};
   background-color: white;
   opacity: 1;
 
@@ -62,6 +99,13 @@ const PlayIconWrapper = styled.div<{ enabled: boolean }>`
       enabled ? theme.colors.spotifyGreen : theme.colors.disabled};
     cursor: pointer;
   }
+`;
+
+const SessionQueue = styled.div`
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
 `;
 
 const PlayerContainer = styled.div`
@@ -92,21 +136,40 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
     <Layout>
       {data?.session && (
         <Container>
-          <SessionInfo>
-            <SessionHead>
-              <h1>{data.session.name}</h1>
-              <PlayIconWrapper enabled={!!device}>
+          <Header>
+            <SessionInfo>
+              {data.session.cover && (
+                <Cover>
+                  <img src={data.session.cover} />
+                </Cover>
+              )}
+              <div>
+                <h1>{data.session.name}</h1>
+                <p>{data.session.description || ''}</p>
+              </div>
+            </SessionInfo>
+            <ActionBar>
+              <PlayIconWrapper enabled={!!device} className="icon-wrapper">
                 <BsPlayCircleFill onClick={playSession} className="play-icon" />
               </PlayIconWrapper>
-            </SessionHead>
-            <p>{data.session.description || ''}</p>
-          </SessionInfo>
-          <div style={{ width: '100%' }}>
-            <Playlist queue={data.session.queue} sessionId={sessionId} />
+              <EditBtn
+                sessionId={sessionId}
+                initialValues={{
+                  name: data.session.name,
+                  description: data.session.description,
+                  cover: data.session.cover,
+                }}
+                editIconStyle="outline"
+              />
+            </ActionBar>
+          </Header>
+          <SessionQueue>
+            <Playlist sessionId={sessionId} queue={data.session.queue} />
             <PlayerContainer>
               <Player queue={data.session.queue} />
             </PlayerContainer>
-          </div>
+          </SessionQueue>
+          <div className="underlay" />
         </Container>
       )}
     </Layout>
