@@ -1,13 +1,24 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { usePlayer } from './PlayerContext';
 
-const PlaybackStateContext = createContext<Spotify.PlaybackState | null>(null);
+interface PlaybackState {
+  playbackState: Spotify.PlaybackState | null;
+  lastPlayedTrack: Spotify.Track | null;
+}
+
+const PlaybackStateContext = createContext<PlaybackState>({
+  playbackState: null,
+  lastPlayedTrack: null,
+});
 
 export const PlaybackStateProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [playbackState, setPlaybackState] =
     useState<Spotify.PlaybackState | null>(null);
+  const [lastPlayedTrack, setLastPlayedTrack] = useState<Spotify.Track | null>(
+    null
+  );
 
   const player = usePlayer();
 
@@ -23,10 +34,13 @@ export const PlaybackStateProvider: React.FC<{ children: React.ReactNode }> = ({
   const playerStateChanged = (state: Spotify.PlaybackState) => {
     console.log('playerStateChanged', state);
     setPlaybackState(state);
+    if (state?.track_window?.current_track) {
+      setLastPlayedTrack(state.track_window.current_track);
+    }
   };
 
   return (
-    <PlaybackStateContext.Provider value={playbackState}>
+    <PlaybackStateContext.Provider value={{ playbackState, lastPlayedTrack }}>
       {children}
     </PlaybackStateContext.Provider>
   );
@@ -35,14 +49,22 @@ export const PlaybackStateProvider: React.FC<{ children: React.ReactNode }> = ({
 export const usePlaybackState = (
   interval = false,
   duration = 1000
-): Spotify.PlaybackState | null => {
+): PlaybackState => {
   const fromContext = useContext(PlaybackStateContext);
 
-  const [playbackState, setPlaybackState] = useState(fromContext);
+  const [playbackState, setPlaybackState] = useState(
+    fromContext?.playbackState
+  );
+  const [lastPlayedTrack, setLastPlayedTrack] = useState(
+    fromContext?.lastPlayedTrack
+  );
 
   const player = usePlayer();
 
-  useEffect(() => setPlaybackState(fromContext), [fromContext]);
+  useEffect(() => {
+    setPlaybackState(fromContext?.playbackState);
+    setLastPlayedTrack(fromContext?.lastPlayedTrack);
+  }, [fromContext]);
 
   const playbackStateIsNull = playbackState === null;
   useEffect(() => {
@@ -57,5 +79,5 @@ export const usePlaybackState = (
     return () => window.clearInterval(intervalId);
   }, [interval, player, playbackStateIsNull, playbackState?.paused, duration]);
 
-  return playbackState;
+  return { playbackState, lastPlayedTrack };
 };

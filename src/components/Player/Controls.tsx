@@ -1,5 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   BsPlayCircleFill,
   BsPauseCircleFill,
@@ -8,15 +7,13 @@ import {
   BsShuffle,
   BsArrowRepeat,
 } from 'react-icons/bs';
-import { usePlayer } from '../../contexts/PlayerContext';
-import { usePlaybackState } from '../../contexts/PlaybackStateContext';
+import usePlayerControls from '../../hooks/usePlayerControls';
 
 const ControlGroup = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 1.2em;
 `;
 
 const ControlIcon = styled.div<{ on?: boolean }>`
@@ -34,31 +31,47 @@ const ControlIcon = styled.div<{ on?: boolean }>`
   }
 `;
 
+const StatefulIcon = styled(ControlIcon)<{ enabled: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+
+  ${({ enabled, theme }) =>
+    enabled &&
+    css`
+      box-shadow: 0 0 15px ${theme.colors.lightGreen30};
+      background-color: ${theme.colors.lightGreen30};
+
+      svg {
+        fill: ${theme.colors.spotifyGreen};
+      }
+    `}
+`;
+
+enum PlaybackStateRepeat {
+  OFF,
+  CONTEXT,
+  TRACK,
+}
 interface ControlsProps {
-  toggleShuffle: () => void;
-  toggleRepeat: () => void;
+  controlGroupStyles?: React.CSSProperties;
 }
 
-const Controls: React.FC<ControlsProps> = ({ toggleShuffle, toggleRepeat }) => {
-  const player = usePlayer();
-  const playbackState = usePlaybackState();
+const Controls: React.FC<ControlsProps> = ({ controlGroupStyles }) => {
+  const { player, playbackState, toggleShuffle, toggleRepeat, isPaused } =
+    usePlayerControls();
 
-  const [isShuffle, setShuffle] = useState<boolean>(false);
-  const [repeatMode, setRepeatMode] = useState<number>(0);
-
-  useEffect(() => {
-    if (!playbackState) return;
-
-    setShuffle(playbackState.shuffle);
-    setRepeatMode(playbackState.repeat_mode);
-  }, [playbackState]);
-
-  const isPaused = playbackState?.paused ?? true;
   return (
-    <ControlGroup>
-      <ControlIcon on={isShuffle} onClick={toggleShuffle}>
+    <ControlGroup style={controlGroupStyles}>
+      <StatefulIcon
+        enabled={playbackState ? playbackState.shuffle : false}
+        onClick={toggleShuffle}
+      >
         <BsShuffle className="icon" />
-      </ControlIcon>
+      </StatefulIcon>
       {player ? (
         <ControlIcon onClick={() => player.previousTrack()}>
           <BsSkipStartFill className="icon" />
@@ -84,9 +97,14 @@ const Controls: React.FC<ControlsProps> = ({ toggleShuffle, toggleRepeat }) => {
       ) : (
         <div />
       )}
-      <ControlIcon on={repeatMode != 0} onClick={toggleRepeat}>
+      <StatefulIcon
+        enabled={
+          playbackState?.repeat_mode !== PlaybackStateRepeat.OFF ?? false
+        }
+        onClick={toggleRepeat}
+      >
         <BsArrowRepeat className="icon" />
-      </ControlIcon>
+      </StatefulIcon>
     </ControlGroup>
   );
 };

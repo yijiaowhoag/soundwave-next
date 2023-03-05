@@ -1,23 +1,9 @@
-import styled, { css } from 'styled-components';
-import {
-  BsPlayCircleFill,
-  BsPauseCircleFill,
-  BsSkipStartFill,
-  BsSkipEndFill,
-  BsShuffle,
-  BsArrowRepeat,
-} from 'react-icons/bs';
-import {
-  useShuffleMutation,
-  useRepeatMutation,
-  Track,
-  RepeatMode,
-} from '../../__generated__/types';
-import { useDevice } from '../../contexts/DeviceContext';
-import { usePlayer } from '../../contexts/PlayerContext';
-import { usePlaybackState } from '../../contexts/PlaybackStateContext';
+import styled from 'styled-components';
+import usePlayerControls from '../../hooks/usePlayerControls';
+import Controls from '../Player/Controls';
 import ProgressBar from '../Player/ProgressBar';
 import VolumeControl from '../VolumeControl';
+import type { PreviewTrack } from '../../types';
 
 const Container = styled.div`
   position: fixed;
@@ -33,6 +19,28 @@ const Container = styled.div`
   background-color: ${({ theme }) => theme.colors.green};
   font-size: 14px;
   letter-spacing: 0.5px;
+
+  > div:nth-of-type(1) {
+    position: absolute;
+    left: 0;
+  }
+
+  > div:nth-of-type(2) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: ${({ theme }) => theme.columns(4)};
+  }
+
+  > div:nth-of-type(3) {
+    position: absolute;
+    right: 2em;
+  }
 `;
 
 const TrackImage = styled.img`
@@ -67,159 +75,42 @@ const TrackInfo = styled.div`
   }
 `;
 
-const ControlGroupDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: ${({ theme }) => theme.columns(4)};
-`;
-
-const ControlGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0.5em;
-`;
-
-const ControlIcon = styled.div`
-  margin: 0 1.2em;
-  cursor: pointer;
-
-  .icon {
-    width: 1.4em;
-    height: 1.4em;
-  }
-
-  .icon-lg {
-    width: 2.4em;
-    height: 2.4em;
-  }
-`;
-
-const StatefulIcon = styled(ControlIcon)<{ enabled: boolean }>`
-  ${({ enabled, theme }) =>
-    enabled &&
-    css`
-      svg {
-        fill: ${theme.colors.spotifyGreen};
-      }
-    `}
-`;
-
-enum PlaybackStateRepeat {
-  OFF,
-  CONTEXT,
-  TRACK,
-}
-
 interface PlayerProps {
-  playNow?: (tracks: Track[]) => void;
+  lastPlayedTrack?: PreviewTrack;
 }
 
-const PlayerBar: React.FC<PlayerProps> = () => {
-  const device = useDevice();
-  const player = usePlayer();
-  const playbackState = usePlaybackState();
+const PlayerBar: React.FC<PlayerProps> = ({ lastPlayedTrack }) => {
+  const { playbackState, onVolumeChange, curr } = usePlayerControls();
 
-  const [shuffle] = useShuffleMutation();
-  const [repeat] = useRepeatMutation();
-
-  const onVolumeChange = (volume: number) => {
-    if (!player) return;
-    if (volume === 0) {
-      player.setVolume(0.000001);
-    } else {
-      player.setVolume(volume);
-    }
-  };
-
-  const toggleShuffle = () => {
-    if (!device || !playbackState) return;
-    shuffle({
-      variables: {
-        deviceId: device.id,
-        state: !playbackState.shuffle,
-      },
-    });
-  };
-
-  const toggleRepeat = () => {
-    if (!device || !playbackState) return;
-    repeat({
-      variables: {
-        deviceId: device.id,
-        state: [RepeatMode.Off, RepeatMode.Context, RepeatMode.Track][
-          (playbackState.repeat_mode + 1) % 3
-        ],
-      },
-    });
-  };
-
-  const curr = playbackState?.track_window.current_track;
-  const isPaused = playbackState?.paused ?? true;
   return (
     <>
       <Container>
-        {curr && (
-          <TrackInfo>
-            <TrackImage
-              src={curr.album.images.find((image) => image.height === 300)?.url}
-            />
-            <div>
-              <h2>{curr.name}</h2>
-              <p>
-                {curr.artists
-                  .reduce((acc, curr) => [...acc, curr.name], [])
-                  .join(',')}
-              </p>
-            </div>
-          </TrackInfo>
-        )}
-        <ControlGroupDiv>
-          <ControlGroup>
-            <StatefulIcon
-              enabled={playbackState ? playbackState.shuffle : false}
-              onClick={toggleShuffle}
-            >
-              <BsShuffle className="icon" />
-            </StatefulIcon>
-            {player ? (
-              <ControlIcon onClick={() => player.previousTrack()}>
-                <BsSkipStartFill className="icon" />
-              </ControlIcon>
-            ) : (
-              <div />
-            )}
-            {player ? (
-              <ControlIcon onClick={() => player.togglePlay()}>
-                {isPaused ? (
-                  <BsPlayCircleFill className="icon-lg" />
-                ) : (
-                  <BsPauseCircleFill className="icon-lg" />
-                )}
-              </ControlIcon>
-            ) : (
-              <div />
-            )}
-            {player ? (
-              <ControlIcon onClick={() => player.nextTrack()}>
-                <BsSkipEndFill className="icon" />
-              </ControlIcon>
-            ) : (
-              <div />
-            )}
-            <StatefulIcon
-              enabled={
-                playbackState?.repeat_mode !== PlaybackStateRepeat.OFF ?? false
-              }
-              onClick={toggleRepeat}
-            >
-              <BsArrowRepeat className="icon" />
-            </StatefulIcon>
-          </ControlGroup>
+        <div>
+          {curr && (
+            <TrackInfo>
+              <TrackImage
+                src={
+                  curr.album.images.find((image) => image.height === 300)?.url
+                }
+              />
+              <div>
+                <h2>{curr.name}</h2>
+                <p>
+                  {curr.artists
+                    .reduce((acc, curr) => [...acc, curr.name], [])
+                    .join(',')}
+                </p>
+              </div>
+            </TrackInfo>
+          )}
+        </div>
+        <div>
+          <Controls controlGroupStyles={{ marginBottom: '0.5em' }} />
           <ProgressBar playerState={playbackState} />
-        </ControlGroupDiv>
-        <VolumeControl openProp={true} onVolumeChange={onVolumeChange} />
+        </div>
+        <div>
+          <VolumeControl openProp={true} onVolumeChange={onVolumeChange} />
+        </div>
       </Container>
     </>
   );

@@ -7,31 +7,30 @@ import { usePlaybackState } from '../../contexts/PlaybackStateContext';
 import Track from './Track';
 import type { PlaylistTrack } from '../../types';
 
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
+const Queue = styled.ul`
+  margin: 0;
   padding: 0;
-  // overflow: scroll;
+  list-style: none;
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  ul {
-    padding: 0;
-    list-style: none;
+  p {
+    margin-left: 3rem;
   }
 `;
 
 interface PlaylistProps {
   sessionId: string;
   queue?: PlaylistTrack[];
+  updateQueueOffset: (idx: number) => void;
 }
 
-const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {
+const Playlist: React.FC<PlaylistProps> = ({
+  sessionId,
+  queue,
+  updateQueueOffset,
+}) => {
   const device = useDevice();
   const player = usePlayer();
-  const playbackState = usePlaybackState();
+  const { playbackState } = usePlaybackState();
 
   const [selected, setSelected] = useState<string>();
 
@@ -57,29 +56,33 @@ const Playlist: React.FC<PlaylistProps> = ({ sessionId, queue }) => {
   }, [player, playbackState]);
 
   return (
-    <Container>
-      <ul>
-        {queue && queue.length > 0 ? (
-          queue.map((track) => (
-            <li key={`${track.id}`} onClick={() => setSelected(track.id)}>
-              <Track
-                sessionId={sessionId}
-                track={track}
-                isCurrent={
-                  playbackState?.track_window.current_track.id === track.id
-                }
-                isPaused={playbackState?.paused ?? true}
-                isSelected={track.id === selected}
-                playTrack={playTrack}
-                togglePlay={togglePlay}
-              />
-            </li>
-          ))
-        ) : (
-          <p>Nothing is here</p>
-        )}
-      </ul>
-    </Container>
+    <Queue>
+      {queue && queue.length > 0 ? (
+        queue.map((track, idx) => (
+          <li
+            key={`${track.id}`}
+            onClick={() => {
+              setSelected(track.id);
+              updateQueueOffset(idx);
+            }}
+          >
+            <Track
+              sessionId={sessionId}
+              track={track}
+              isCurrent={
+                playbackState?.track_window.current_track.id === track.id
+              }
+              isPaused={playbackState?.paused ?? true}
+              isSelected={track.id === selected}
+              playTrack={playTrack}
+              togglePlay={togglePlay}
+            />
+          </li>
+        ))
+      ) : (
+        <p>Nothing is here</p>
+      )}
+    </Queue>
   );
 };
 
