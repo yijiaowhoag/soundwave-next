@@ -9,7 +9,7 @@ import {
 } from '../../__generated__/types';
 import { FillButton } from '../shared/Button';
 import InputField from '../shared/InputField';
-import EditableCover from './EditableCover';
+import CoverField from './CoverField';
 import useUploadFile from '../../hooks/useUploadFile';
 
 const FormContainer = styled.div`
@@ -143,7 +143,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
         {({ isSubmitting }) => (
           <Form>
             <div>
-              <EditableCover
+              <CoverField
                 name="cover"
                 setFile={setFile}
                 imageStyles={{ width: '12rem' }}

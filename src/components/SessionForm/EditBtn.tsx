@@ -2,7 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import { GrEdit } from 'react-icons/gr';
 import Modal from '../shared/Modal';
-import SessionForm from '../SessionForm';
+import SessionForm from '.';
 
 type EditIconStyle = 'fill' | 'outline';
 

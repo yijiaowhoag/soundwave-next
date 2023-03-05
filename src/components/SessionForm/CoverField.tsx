@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { useFormikContext, useField } from 'formik';
 import { GrEdit } from 'react-icons/gr';
-import { useGenerateUploadUrlMutation } from '../../__generated__/types';
 
 const ImageInput = styled.input`
   display: none;
@@ -110,7 +109,7 @@ const EditableCover: React.FC<EditableCoverProps> = ({
       <ImageOverlay>
         <ImageInput
           type="file"
-          name="avatar"
+          name={name}
           accept="image/*"
           onChange={handleFileChange}
         />
