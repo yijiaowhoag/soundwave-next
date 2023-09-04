@@ -68,6 +68,7 @@ export class SessionResolver {
       const publicUrl = await getPublicUrl(updates.cover);
       updates['cover'] = publicUrl;
     }
+    await db.updateSession(sessionId, updates);
 
     return true;
   }

@@ -1,4 +1,11 @@
-import { createContext, useContext, useRef, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react';
 import { useWebPlaybackSDK } from './WebPlaybackSDKContext';
 
 export const PlayerContext = createContext<Spotify.Player | null>(null);
@@ -14,15 +21,21 @@ export const PlayerProvider: React.FC<{
 
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
 
-  const getOAuthTokenRef = useRef(getOAuthToken);
-  useEffect(() => {
-    getOAuthTokenRef.current = getOAuthToken;
+  const memoizedGetOAuthToken = useMemo(() => {
+    return (cb: (token: string) => void) => {
+      if (getOAuthToken) getOAuthToken(cb);
+    };
   }, [getOAuthToken]);
+
+  // const getOAuthTokenRef = useRef(getOAuthToken);
+  // useEffect(() => {
+  //   getOAuthTokenRef.current = getOAuthToken;
+  // }, [getOAuthToken]);
 
   useEffect(() => {
     if (SDKReady) {
       const player = new Spotify.Player({
-        getOAuthToken: (cb) => getOAuthTokenRef.current(cb),
+        getOAuthToken: memoizedGetOAuthToken,
         name,
         volume,
       });
@@ -32,7 +45,7 @@ export const PlayerProvider: React.FC<{
 
       return () => player.disconnect();
     }
-  }, [connectOnInit, SDKReady]);
+  }, [connectOnInit, memoizedGetOAuthToken, SDKReady]);
 
   return (
     <PlayerContext.Provider value={player}>{children}</PlayerContext.Provider>

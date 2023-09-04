@@ -2,14 +2,14 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { Formik, Form, FormikHelpers } from 'formik';
 import isEqual from 'lodash.isequal';
-import { GrEdit } from 'react-icons/gr';
 import {
   useUpdateCurrUserMutation,
-  useGenerateUploadUrlMutation,
   UpdateUserInput,
 } from '../../__generated__/types';
 import InputField from '../shared/InputField';
+import AvatarField from './AvatarField';
 import { FillButton } from '../shared/Button';
+import useUploadFile, { FieldName } from '../../hooks/useUploadFile';
 
 const FormContainer = styled.div`
   position: absolute;
@@ -38,58 +38,6 @@ const FormContainer = styled.div`
   }
 `;
 
-const AvatarInput = styled.input`
-  display: none;
-`;
-
-const AvatarOverlay = styled.label`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  background-color: ${({ theme }) => theme.colors.darkGreen};
-  opacity: 0;
-
-  .edit-icon {
-    margin-bottom: 5px;
-
-    path {
-      fill: transparent;
-      stroke: white;
-    }
-  }
-`;
-
-const AvatarWrapper = styled.div`
-  position: relative;
-  width: 150px;
-  height: 150px;
-  align-self: center;
-  margin-bottom: 1.5rem;
-
-  :hover {
-    ${AvatarOverlay} {
-      opacity: 0.8;
-      transition: opacity 0.3s ${({ theme }) => theme.animations.bezier};
-    }
-  }
-`;
-
-const AvatarImage = styled.img`
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-`;
-
 interface ProfileFormProps {
   initialValues: {
     avatar: string | null;
@@ -109,13 +57,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   initialValues,
   onClose,
 }) => {
-  const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
-    initialValues.avatar
-  );
-  const [file, setFile] = useState<File>();
+  const { uploadFile, uploadProgress, file, setFile } = useUploadFile();
 
   const [updateCurrUser] = useUpdateCurrUserMutation();
-  const [generateUploadUrl] = useGenerateUploadUrlMutation();
 
   const handleSubmit = async (
     values: ProfileFormValues,
@@ -133,69 +77,32 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           : acc,
       {}
     );
-    if (dirtyFields.avatar) {
-      try {
-        const { data } = await generateUploadUrl({
-          variables: { filename: file.name, mimetype: file.type },
-        });
-        const response = await handleUploadFile(data.generateUploadUrl);
 
-        if (!response.ok) {
-          throw new Error('Failed to upload file');
-        }
-
-        dirtyFields['avatar'] = file.name;
-      } catch (err) {
-        delete dirtyFields.avatar;
-      }
+    if (file) {
+      await uploadFile({
+        fieldName: 'avatar',
+        initialValues: { avatar: initialValues.avatar } as Record<
+          FieldName,
+          string
+        >,
+        setFieldValue: actions.setFieldValue,
+      });
+      dirtyFields['avatar'] = file.name;
     }
+
     await updateCurrUser({ variables: { updates: dirtyFields } });
 
     actions.setSubmitting(false);
     onClose();
   };
 
-  const handleUploadFile = async (signedUrl: string) => {
-    return await fetch(signedUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': file.type,
-      },
-    });
-  };
-
   return (
     <FormContainer>
       <h2>User Profile</h2>
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-        {({ isSubmitting, setFieldValue, values, dirty }) => (
+        {({ isSubmitting, values, dirty }) => (
           <Form>
-            <AvatarWrapper>
-              <AvatarOverlay>
-                <AvatarInput
-                  type="file"
-                  name="avatar"
-                  accept="image/*"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setFile(file);
-                      const url = URL.createObjectURL(file);
-                      setAvatarPreview(url);
-                      setFieldValue('avatar', url);
-                    }
-                  }}
-                />
-                <GrEdit className="edit-icon" size={32} />
-                <span>Choose Photo</span>
-              </AvatarOverlay>
-              {avatarPreview ? (
-                <AvatarImage src={avatarPreview} alt="Avatar" />
-              ) : (
-                <AvatarImage src="/default-avatar.png" alt="Avatar" />
-              )}
-            </AvatarWrapper>
+            <AvatarField setFile={setFile} />
             <InputField label="Display Name" name="display_name" />
             <InputField
               label="Email"

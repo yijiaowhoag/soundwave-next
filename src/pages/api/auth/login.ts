@@ -7,6 +7,7 @@ const SCOPES: string[] = [
   'user-read-email',
   'user-read-private',
   'user-top-read',
+  'user-read-recently-played',
   'streaming',
 ];
 

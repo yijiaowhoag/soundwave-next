@@ -114,6 +114,7 @@ export type Mutation = {
   repeat: Scalars['Boolean'];
   shuffle: Scalars['Boolean'];
   updateCurrUser: User;
+  updateSession: Scalars['Boolean'];
 };
 
 
@@ -189,13 +190,13 @@ export type MutationUpdateSessionArgs = {
 export type Query = {
   __typename?: 'Query';
   artistDetails: ArtistDetails;
-  me?: Maybe<User>;
+  currUser?: Maybe<User>;
   recommendations: Array<Track>;
   search: Array<Track>;
   session: Session;
   sessions: Array<Session>;
-  userTopArtists: Array<Artist>;
-  userTopTracks: Array<Track>;
+  userRecentlyPlayed: Array<Track>;
+  userTopItems: UserTopItems;
 };
 
 
@@ -221,13 +222,14 @@ export type QuerySessionArgs = {
 };
 
 
-export type QueryUserTopArtistsArgs = {
+export type QueryUserRecentlyPlayedArgs = {
+  after?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['Int']>;
   limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
 };
 
 
-export type QueryUserTopTracksArgs = {
+export type QueryUserTopItemsArgs = {
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
 };
@@ -339,6 +341,12 @@ export type User = {
   searches: Array<Search>;
 };
 
+export type UserTopItems = {
+  __typename?: 'UserTopItems';
+  topArtists: Array<Artist>;
+  topTracks: Array<Track>;
+};
+
 export type AddSearchMutationVariables = Exact<{
   seed: SeedInput;
 }>;
@@ -440,11 +448,6 @@ export type ArtistQueryVariables = Exact<{
 
 export type ArtistQuery = { __typename?: 'Query', artistDetails: { __typename?: 'ArtistDetails', id: string, name: string, genres: Array<string>, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }>, topTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, popularity?: number | null, preview_url?: string | null, uri: string, album: { __typename?: 'Album', id: string, name: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }>, relatedArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, uri: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
 
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, display_name: string, email: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> } | null };
-
 export type RecommendationsQueryVariables = Exact<{
   seeds?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
   filters?: InputMaybe<AudioFiltersInput>;
@@ -460,6 +463,11 @@ export type SearchQueryVariables = Exact<{
 
 export type SearchQuery = { __typename?: 'Query', search: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', name: string }> }> };
 
+export type SelfQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SelfQuery = { __typename?: 'Query', currUser?: { __typename?: 'User', id: string, display_name: string, email: string, avatar: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }>, searches: Array<{ __typename?: 'Search', id: string, name: string, type: SearchType, imageUrl: string, timestamp: string }> } | null };
+
 export type SessionQueryVariables = Exact<{
   sessionId: Scalars['String'];
 }>;
@@ -472,21 +480,22 @@ export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, name: string, description?: string | null, cover?: string | null }> };
 
-export type UserTopArtistsQueryVariables = Exact<{
+export type UserRecentlyPlayedQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type UserRecentlyPlayedQuery = { __typename?: 'Query', userRecentlyPlayed: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
+
+export type UserTopItemsQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']>;
   limit?: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type UserTopArtistsQuery = { __typename?: 'Query', userTopArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, uri: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> };
-
-export type UserTopTracksQueryVariables = Exact<{
-  offset?: InputMaybe<Scalars['Int']>;
-  limit?: InputMaybe<Scalars['Int']>;
-}>;
-
-
-export type UserTopTracksQuery = { __typename?: 'Query', userTopTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }> };
+export type UserTopItemsQuery = { __typename?: 'Query', userTopItems: { __typename?: 'UserTopItems', topTracks: Array<{ __typename?: 'Track', id: string, name: string, duration_ms: number, uri: string, album: { __typename?: 'Album', images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }, artists: Array<{ __typename?: 'Artist', id: string, name: string }> }>, topArtists: Array<{ __typename?: 'Artist', id: string, name: string, genres: Array<string>, uri: string, images: Array<{ __typename?: 'Image', url: string, width?: number | null, height?: number | null }> }> } };
 
 
 export const AddSearchDocument = gql`
@@ -966,47 +975,6 @@ export function useArtistLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Art
 export type ArtistQueryHookResult = ReturnType<typeof useArtistQuery>;
 export type ArtistLazyQueryHookResult = ReturnType<typeof useArtistLazyQuery>;
 export type ArtistQueryResult = Apollo.QueryResult<ArtistQuery, ArtistQueryVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    id
-    display_name
-    email
-    images {
-      url
-      width
-      height
-    }
-  }
-}
-    `;
-
-/**
- * __useMeQuery__
- *
- * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
-export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
-export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
-export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const RecommendationsDocument = gql`
     query Recommendations($seeds: [String!], $filters: AudioFiltersInput) {
   recommendations(seeds: $seeds, filters: $filters) {
@@ -1109,6 +1077,55 @@ export function useSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Sea
 export type SearchQueryHookResult = ReturnType<typeof useSearchQuery>;
 export type SearchLazyQueryHookResult = ReturnType<typeof useSearchLazyQuery>;
 export type SearchQueryResult = Apollo.QueryResult<SearchQuery, SearchQueryVariables>;
+export const SelfDocument = gql`
+    query Self {
+  currUser {
+    id
+    display_name
+    email
+    avatar
+    images {
+      url
+      width
+      height
+    }
+    searches {
+      id
+      name
+      type
+      imageUrl
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useSelfQuery__
+ *
+ * To run a query within a React component, call `useSelfQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSelfQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSelfQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSelfQuery(baseOptions?: Apollo.QueryHookOptions<SelfQuery, SelfQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SelfQuery, SelfQueryVariables>(SelfDocument, options);
+      }
+export function useSelfLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQuery, SelfQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SelfQuery, SelfQueryVariables>(SelfDocument, options);
+        }
+export type SelfQueryHookResult = ReturnType<typeof useSelfQuery>;
+export type SelfLazyQueryHookResult = ReturnType<typeof useSelfLazyQuery>;
+export type SelfQueryResult = Apollo.QueryResult<SelfQuery, SelfQueryVariables>;
 export const SessionDocument = gql`
     query Session($sessionId: String!) {
   session(sessionId: $sessionId) {
@@ -1200,53 +1217,9 @@ export function useSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<S
 export type SessionsQueryHookResult = ReturnType<typeof useSessionsQuery>;
 export type SessionsLazyQueryHookResult = ReturnType<typeof useSessionsLazyQuery>;
 export type SessionsQueryResult = Apollo.QueryResult<SessionsQuery, SessionsQueryVariables>;
-export const UserTopArtistsDocument = gql`
-    query UserTopArtists($offset: Int, $limit: Int) {
-  userTopArtists(offset: $offset, limit: $limit) {
-    id
-    name
-    genres
-    images {
-      url
-      width
-      height
-    }
-    uri
-  }
-}
-    `;
-
-/**
- * __useUserTopArtistsQuery__
- *
- * To run a query within a React component, call `useUserTopArtistsQuery` and pass it any options that fit your needs.
- * When your component renders, `useUserTopArtistsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUserTopArtistsQuery({
- *   variables: {
- *      offset: // value for 'offset'
- *      limit: // value for 'limit'
- *   },
- * });
- */
-export function useUserTopArtistsQuery(baseOptions?: Apollo.QueryHookOptions<UserTopArtistsQuery, UserTopArtistsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UserTopArtistsQuery, UserTopArtistsQueryVariables>(UserTopArtistsDocument, options);
-      }
-export function useUserTopArtistsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserTopArtistsQuery, UserTopArtistsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UserTopArtistsQuery, UserTopArtistsQueryVariables>(UserTopArtistsDocument, options);
-        }
-export type UserTopArtistsQueryHookResult = ReturnType<typeof useUserTopArtistsQuery>;
-export type UserTopArtistsLazyQueryHookResult = ReturnType<typeof useUserTopArtistsLazyQuery>;
-export type UserTopArtistsQueryResult = Apollo.QueryResult<UserTopArtistsQuery, UserTopArtistsQueryVariables>;
-export const UserTopTracksDocument = gql`
-    query UserTopTracks($offset: Int, $limit: Int) {
-  userTopTracks(offset: $offset, limit: $limit) {
+export const UserRecentlyPlayedDocument = gql`
+    query UserRecentlyPlayed($before: Int, $after: Int, $limit: Int) {
+  userRecentlyPlayed(before: $before, after: $after, limit: $limit) {
     id
     name
     album {
@@ -1267,30 +1240,94 @@ export const UserTopTracksDocument = gql`
     `;
 
 /**
- * __useUserTopTracksQuery__
+ * __useUserRecentlyPlayedQuery__
  *
- * To run a query within a React component, call `useUserTopTracksQuery` and pass it any options that fit your needs.
- * When your component renders, `useUserTopTracksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useUserRecentlyPlayedQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserRecentlyPlayedQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useUserTopTracksQuery({
+ * const { data, loading, error } = useUserRecentlyPlayedQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useUserRecentlyPlayedQuery(baseOptions?: Apollo.QueryHookOptions<UserRecentlyPlayedQuery, UserRecentlyPlayedQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserRecentlyPlayedQuery, UserRecentlyPlayedQueryVariables>(UserRecentlyPlayedDocument, options);
+      }
+export function useUserRecentlyPlayedLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserRecentlyPlayedQuery, UserRecentlyPlayedQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserRecentlyPlayedQuery, UserRecentlyPlayedQueryVariables>(UserRecentlyPlayedDocument, options);
+        }
+export type UserRecentlyPlayedQueryHookResult = ReturnType<typeof useUserRecentlyPlayedQuery>;
+export type UserRecentlyPlayedLazyQueryHookResult = ReturnType<typeof useUserRecentlyPlayedLazyQuery>;
+export type UserRecentlyPlayedQueryResult = Apollo.QueryResult<UserRecentlyPlayedQuery, UserRecentlyPlayedQueryVariables>;
+export const UserTopItemsDocument = gql`
+    query UserTopItems($offset: Int, $limit: Int) {
+  userTopItems(offset: $offset, limit: $limit) {
+    topTracks {
+      id
+      name
+      album {
+        images {
+          url
+          width
+          height
+        }
+      }
+      artists {
+        id
+        name
+      }
+      duration_ms
+      uri
+    }
+    topArtists {
+      id
+      name
+      genres
+      images {
+        url
+        width
+        height
+      }
+      uri
+    }
+  }
+}
+    `;
+
+/**
+ * __useUserTopItemsQuery__
+ *
+ * To run a query within a React component, call `useUserTopItemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserTopItemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserTopItemsQuery({
  *   variables: {
  *      offset: // value for 'offset'
  *      limit: // value for 'limit'
  *   },
  * });
  */
-export function useUserTopTracksQuery(baseOptions?: Apollo.QueryHookOptions<UserTopTracksQuery, UserTopTracksQueryVariables>) {
+export function useUserTopItemsQuery(baseOptions?: Apollo.QueryHookOptions<UserTopItemsQuery, UserTopItemsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UserTopTracksQuery, UserTopTracksQueryVariables>(UserTopTracksDocument, options);
+        return Apollo.useQuery<UserTopItemsQuery, UserTopItemsQueryVariables>(UserTopItemsDocument, options);
       }
-export function useUserTopTracksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserTopTracksQuery, UserTopTracksQueryVariables>) {
+export function useUserTopItemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserTopItemsQuery, UserTopItemsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UserTopTracksQuery, UserTopTracksQueryVariables>(UserTopTracksDocument, options);
+          return Apollo.useLazyQuery<UserTopItemsQuery, UserTopItemsQueryVariables>(UserTopItemsDocument, options);
         }
-export type UserTopTracksQueryHookResult = ReturnType<typeof useUserTopTracksQuery>;
-export type UserTopTracksLazyQueryHookResult = ReturnType<typeof useUserTopTracksLazyQuery>;
-export type UserTopTracksQueryResult = Apollo.QueryResult<UserTopTracksQuery, UserTopTracksQueryVariables>;
+export type UserTopItemsQueryHookResult = ReturnType<typeof useUserTopItemsQuery>;
+export type UserTopItemsLazyQueryHookResult = ReturnType<typeof useUserTopItemsLazyQuery>;
+export type UserTopItemsQueryResult = Apollo.QueryResult<UserTopItemsQuery, UserTopItemsQueryVariables>;

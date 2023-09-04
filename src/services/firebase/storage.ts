@@ -1,14 +1,12 @@
-import { admin } from './init';
+import { storage } from './init';
 import {
   GetSignedUrlConfig,
   GetSignedUrlResponse,
 } from '@google-cloud/storage';
 
-const storage = admin.storage();
-
 const corsConfig = [
   {
-    origin: ['http://localhost:8080'],
+    origin: ['http://localhost:8080', 'https://soundwave-next.vercel.app'],
     responseHeader: ['Content-Type'],
     method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     maxAgeSeconds: 3600,

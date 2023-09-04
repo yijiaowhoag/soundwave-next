@@ -1,10 +1,11 @@
-import { createRef, forwardRef, useState } from 'react';
+import { createRef, useState } from 'react';
 import styled from 'styled-components';
 import { BsPlayFill, BsPauseFill } from 'react-icons/bs';
-import { useAddTrackMutation, Track, Artist } from '../../__generated__/types';
+import { useAddTrackMutation } from '../../__generated__/types';
 import { convertDurationMs } from '../../utils/convertDuration';
 import PreviewAudio from './PreviewAudio';
 import Menu from '../shared/Menu';
+import type { PreviewTrack as PreviewTrackType } from '../../types';
 
 const TrackImageContainer = styled.div`
   position: relative;
@@ -59,7 +60,7 @@ const TrackContent = styled.div`
   }
 `;
 
-const HoverOverlay = styled.div`
+const Underlay = styled.div`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -91,7 +92,7 @@ const TrackContainer = styled.div`
         `opacity 0.8s ${theme.animations.bezier}, transform 0.6s ${theme.animations.bezier}`};
     }
 
-    ${HoverOverlay} {
+    ${Underlay} {
       opacity: 0.9;
       transition: opacity 1s ${({ theme }) => theme.animations.bezier};
     }
@@ -131,86 +132,75 @@ const TrackPreview = styled.div`
   }
 `;
 
-const IconWrapper = styled.div`
-  width: 25px;
-  height: 25px;
-`;
-
-type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
-type PreviewTrack = Omit<Track, 'artists'> & {
-  artists: Array<Optional<Artist, 'genres' | 'images' | 'uri'>>;
-};
 interface PreviewTrackProps {
-  track: PreviewTrack;
-  onAdd?: (track: PreviewTrack) => void;
+  track: PreviewTrackType;
+  onAdd?: (track: PreviewTrackType) => void;
 }
 
-const PreviewTrack: React.FC<PreviewTrackProps> = forwardRef(
-  ({ track }, ref) => {
-    const audioRef = createRef<HTMLAudioElement>();
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [addTrack] = useAddTrackMutation();
+const PreviewTrack: React.FC<PreviewTrackProps> = ({ track }) => {
+  const audioRef = createRef<HTMLAudioElement>();
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [addTrack] = useAddTrackMutation();
 
-    const togglePlay = () => {
-      if (isPlaying) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current?.play();
-        setIsPlaying(true);
-      }
-    };
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current?.play();
+      setIsPlaying(true);
+    }
+  };
 
-    return (
-      <TrackContainer>
-        <TrackImageContainer onClick={togglePlay}>
-          {track.preview_url && (
-            <PlayIconWrapper>
-              {isPlaying ? (
-                <BsPauseFill className="pause-icon" />
-              ) : (
-                <BsPlayFill className="play-icon" />
-              )}
-            </PlayIconWrapper>
-          )}
-          <TrackImage
-            src={track.album.images.find((image) => image.height === 300)?.url}
-          />
-        </TrackImageContainer>
-        <TrackContent>
-          <div>
-            <TrackName>{track.name}</TrackName>
-            <TrackArtists>
-              {track.artists &&
-                track.artists
-                  .reduce((acc, curr) => [...acc, curr.name], [])
-                  .join(', ')}
-            </TrackArtists>
-          </div>
-          <div>
-            {track.preview_url && (
-              <TrackPreview>
-                <span>Preview</span>
-                <PreviewAudio ref={audioRef} preview_url={track.preview_url} />
-              </TrackPreview>
+  return (
+    <TrackContainer>
+      <TrackImageContainer onClick={togglePlay}>
+        {track.preview_url && (
+          <PlayIconWrapper>
+            {isPlaying ? (
+              <BsPauseFill className="pause-icon" />
+            ) : (
+              <BsPlayFill className="play-icon" />
             )}
-            <span>{convertDurationMs(track.duration_ms)}</span>
-            <Menu
-              onAdd={(sessionId) =>
-                addTrack({
-                  variables: {
-                    sessionId,
-                    track: { ...track, images: track.album.images },
-                  },
-                })
-              }
-            />
-          </div>
-        </TrackContent>
-        <HoverOverlay />
-      </TrackContainer>
-    );
-  }
-);
+          </PlayIconWrapper>
+        )}
+        <TrackImage
+          src={track.album.images.find((image) => image.height === 300)?.url}
+        />
+      </TrackImageContainer>
+      <TrackContent>
+        <div>
+          <TrackName>{track.name}</TrackName>
+          <TrackArtists>
+            {track.artists &&
+              track.artists
+                .reduce((acc, curr) => [...acc, curr.name], [])
+                .join(', ')}
+          </TrackArtists>
+        </div>
+        <div>
+          {track.preview_url && (
+            <TrackPreview>
+              <span>Preview</span>
+              <PreviewAudio ref={audioRef} preview_url={track.preview_url} />
+            </TrackPreview>
+          )}
+          <span>{convertDurationMs(track.duration_ms)}</span>
+          <Menu
+            onAdd={(sessionId) =>
+              addTrack({
+                variables: {
+                  sessionId,
+                  track: { ...track, images: track.album.images },
+                },
+              })
+            }
+          />
+        </div>
+      </TrackContent>
+      <Underlay />
+    </TrackContainer>
+  );
+};
 
 export default PreviewTrack;

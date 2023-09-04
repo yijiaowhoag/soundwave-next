@@ -1,11 +1,13 @@
 import styled from 'styled-components';
 import { useSessionsQuery } from '../../__generated__/types';
+import LoadingSpinner from '../shared/LoadingSpinner';
+import Error from '../shared/Error';
 import SessionCard from './SessionCard';
 
 const SessionsDiv = styled.div`
   width: 100%;
   padding: 5rem 0 2rem 0;
-  overflow: auto;
+  overflow-x: auto;
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1));
 
   ul {
@@ -18,14 +20,20 @@ const SessionsDiv = styled.div`
       margin-left: 2rem;
     }
   }
+
+  > p {
+    margin-left: 2rem;
+  }
 `;
 
 const Sessions: React.FC = () => {
-  const { data, loading } = useSessionsQuery();
+  const { data, loading, error } = useSessionsQuery();
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <Error error={error} />;
 
   return (
     <SessionsDiv>
-      {loading && <p>Loading...</p>}
       {data?.sessions && data.sessions.length > 0 ? (
         <ul>
           {data.sessions.map((session) => (

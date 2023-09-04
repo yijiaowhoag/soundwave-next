@@ -1,17 +1,18 @@
 import styled from 'styled-components';
 import { FaPlus } from 'react-icons/fa';
 import {
-  useUserTopArtistsQuery,
+  useUserRecentlyPlayedQuery,
   usePlayMutation,
 } from '../__generated__/types';
 import { useDevice } from '../contexts/DeviceContext';
+import Error from '../components/shared/Error';
 import Layout from '../components/shared/Layout';
 import Modal from '../components/shared/Modal';
 import { OutlineButton } from '../components/shared/Button';
 import SessionForm from '../components/SessionForm';
 import Sessions from '../components/Sessions';
-import TopTracks from '../components/TopTracks';
-import TopArtists from '../components/Artists';
+import UserTopItems from '../components/UserTopItems';
+import RecentTracks from '../components/UserTopItems/Tracks';
 import PlayerBar from '../components/PlayerBar';
 
 const Main = styled.div`
@@ -20,7 +21,7 @@ const Main = styled.div`
   flex-direction: column;
   justify-content: space-between;
   margin-left: 0;
-  padding-bottom: 10vh;
+  padding-bottom: 16vh;
 `;
 
 const ActionBar = styled.div`
@@ -29,11 +30,11 @@ const ActionBar = styled.div`
   right: 2.5rem;
   display: flex;
   align-items: center;
-  padding: 1.5rem 0;
+  padding: 1.2rem 0;
 
   h2 {
     margin: 0 1rem 0 2rem;
-    font-weight: 400;
+    font-weight: bold;
     font-size: 20px;
   }
 `;
@@ -50,13 +51,7 @@ const ActionButton = styled(OutlineButton)`
 
 const Dashboard: React.FC = () => {
   const device = useDevice();
-
-  const { data, loading, error } = useUserTopArtistsQuery({
-    variables: {
-      offset: 0,
-      limit: 20,
-    },
-  });
+  const { data, loading, error } = useUserRecentlyPlayedQuery();
   const [play] = usePlayMutation();
 
   const handlePlayQueue = (uris: string[], offset: number) => {
@@ -69,36 +64,31 @@ const Dashboard: React.FC = () => {
     <>
       <Layout>
         <Main>
-          {error && <strong>Error: {JSON.stringify(error)}</strong>}
-          {loading && <span>Loading...</span>}
-          {data && (
-            <>
-              <ActionBar>
-                <h2>My Sessions</h2>
-                <Modal
-                  activator={
-                    <ActionButton>
-                      New Session
-                      <FaPlus className="plus-icon" />
-                    </ActionButton>
-                  }
-                >
-                  {({ closeModal }) => <SessionForm onClose={closeModal} />}
-                </Modal>
-              </ActionBar>
-              <Sessions />
-              <TopTracks handlePlayQueue={handlePlayQueue} />
-              <TopArtists
-                heading="Recent Artists"
-                artists={data.userTopArtists}
-                loading={loading}
-                error={JSON.stringify(error)}
-              />
-            </>
-          )}
+          <>
+            <ActionBar>
+              <h2>My Sessions</h2>
+              <Modal
+                activator={
+                  <ActionButton>
+                    New Session
+                    <FaPlus className="plus-icon" />
+                  </ActionButton>
+                }
+              >
+                {({ closeModal }) => <SessionForm onClose={closeModal} />}
+              </Modal>
+            </ActionBar>
+            <Sessions />
+            <RecentTracks
+              heading="Recently Played"
+              tracks={data?.userRecentlyPlayed}
+              handlePlayQueue={handlePlayQueue}
+            />
+            <UserTopItems handlePlayQueue={handlePlayQueue} />
+          </>
         </Main>
       </Layout>
-      <PlayerBar />
+      <PlayerBar lastPlayedTrack={data?.userRecentlyPlayed[0]} />
     </>
   );
 };

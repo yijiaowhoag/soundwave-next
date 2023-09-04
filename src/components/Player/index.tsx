@@ -51,7 +51,6 @@ interface PlayerProps {
 const Player: React.FC<PlayerProps> = ({ queue }) => {
   const { playbackState, onVolumeChange, curr, next } = usePlayerControls();
 
-  console.log('CURR TRACK', curr);
   return (
     <>
       <Container>
@@ -59,7 +58,13 @@ const Player: React.FC<PlayerProps> = ({ queue }) => {
           <h2>Now Playing</h2>
           <VolumeControl openProp={false} onVolumeChange={onVolumeChange} />
         </PlayerHeader>
-        <CurrentTrack curr={curr} />
+        <CurrentTrack
+          name={curr?.name}
+          artists={curr?.artists
+            .reduce<string[]>((acc, curr) => [...acc, curr.name], [])
+            .join(', ')}
+          cover={curr?.album.images.find((image) => image.height === 300)?.url}
+        />
         <Controls controlGroupStyles={{ marginTop: '1.2em' }} />
         <ProgressBar playerState={playbackState} />
         <NextTrack>

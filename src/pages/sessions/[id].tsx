@@ -1,14 +1,20 @@
 import styled from 'styled-components';
-import { BsPlayCircleFill } from 'react-icons/bs';
 import type { GetServerSideProps } from 'next';
 import { useSessionQuery, usePlayMutation } from '../../__generated__/types';
 import { useDevice } from '../../contexts/DeviceContext';
+import Error from '../../components/shared/Error';
 import Layout from '../../components/shared/Layout';
-import EditBtn, { EditIcon } from '../../components/SessionForm/EditBtn';
+import EditBtn from '../../components/SessionForm/EditBtn';
+import PlayBtn from '../../components/Session/PlayBtn';
+import PlaylistContainer from '../../components/Playlist/Container';
 import Playlist from '../../components/Playlist';
+import PlayerContainer from '../../components/Player/Container';
 import Player from '../../components/Player';
 
 const Container = styled.div`
+  --playerWidth: ${({ theme }) => theme.columns(3.5)};
+  --headerHeight: ${({ theme }) => theme.columns(2.5)};
+
   position: absolute;
   left: 0;
   right: 0;
@@ -16,6 +22,7 @@ const Container = styled.div`
   bottom: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: hidden;
 
   .underlay {
     position: absolute;
@@ -29,47 +36,38 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
+  position: relative;
+  padding-right: var(--playerWidth);
   border-bottom: 1.5px solid ${({ theme }) => theme.colors.green};
 `;
 
 const SessionInfo = styled.div`
   position: relative;
+  z-index: 1;
   display: flex;
-  height: ${({ theme }) => theme.columns(2.5)};
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
 
-  > div:last-child {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 1.5rem 0;
+  h1,
+  p {
+    margin: 0;
+    cursor: pointer;
+  }
 
-    h1,
-    p {
-      margin: 1em 0.5em 0 0;
-      cursor: pointer;
-    }
-
-    h1 {
-      font-size: 3.2rem;
-      font-weight: bold;
-    }
-
-    p {
-      opacity: 0.5;
-    }
+  h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
   }
 `;
 
-const Cover = styled.div`
-  width: ${({ theme }) => theme.columns(2.5)};
-  padding: 1.5rem;
-
-  img {
-    width: 100%;
-    height: 100%;
-    box-shadow: 8px 10px 10px ${({ theme }) => theme.shadow.darkest};
-    object-fit: cover;
-  }
+const SessionCover = styled.img`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 25% 25%;
 `;
 
 const ActionBar = styled.div`
@@ -84,40 +82,22 @@ const ActionBar = styled.div`
   }
 `;
 
-const PlayIconWrapper = styled.div<{ enabled: boolean }>`
-  width: 3em;
-  height: 3em;
-  border-radius: 100%;
-  box-shadow: 5px 10px 15px ${({ theme }) => theme.shadow.darkest};
-  background-color: white;
-  opacity: 1;
-
-  .play-icon {
-    width: 100%;
-    height: 100%;
-    fill: ${({ enabled, theme }) =>
-      enabled ? theme.colors.spotifyGreen : theme.colors.disabled};
-    cursor: pointer;
-  }
-`;
-
 const SessionQueue = styled.div`
-  position: relative;
   z-index: 1;
   display: flex;
   flex: 1;
 `;
 
-const PlayerContainer = styled.div`
-  width: ${({ theme }) => theme.columns(4)};
-  border-left: 1.5px solid ${({ theme }) => theme.colors.green};
-`;
-
 const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
   const device = useDevice();
 
-  const { data, loading } = useSessionQuery({ variables: { sessionId } });
+  const { data, loading, error } = useSessionQuery({
+    variables: { sessionId },
+  });
   const [play] = usePlayMutation();
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <Error error={error} />;
 
   const uris = data?.session.queue.map((track) => track.uri);
   const playSession = () => {
@@ -128,45 +108,42 @@ const Session: React.FC<{ sessionId: string }> = ({ sessionId }) => {
     });
   };
 
-  if (loading) return <p>Loading...</p>;
-
-  if (!data?.session) return null;
-
+  const { session } = data;
   return (
     <Layout>
-      {data?.session && (
+      {session && (
         <Container>
           <Header>
             <SessionInfo>
-              {data.session.cover && (
-                <Cover>
-                  <img src={data.session.cover} />
-                </Cover>
-              )}
-              <div>
-                <h1>{data.session.name}</h1>
-                <p>{data.session.description || ''}</p>
-              </div>
+              <h1>{session.name}</h1>
+              <p>{session.description || ''}</p>
             </SessionInfo>
+            {session.cover && (
+              <SessionCover src={data.session.cover}></SessionCover>
+            )}
             <ActionBar>
-              <PlayIconWrapper enabled={!!device} className="icon-wrapper">
-                <BsPlayCircleFill onClick={playSession} className="play-icon" />
-              </PlayIconWrapper>
+              <PlayBtn disabled={!device} play={playSession} />
               <EditBtn
                 sessionId={sessionId}
                 initialValues={{
-                  name: data.session.name,
-                  description: data.session.description,
-                  cover: data.session.cover,
+                  name: session.name,
+                  description: session.description,
+                  cover: session.cover,
                 }}
                 editIconStyle="outline"
               />
             </ActionBar>
           </Header>
           <SessionQueue>
-            <Playlist sessionId={sessionId} queue={data.session.queue} />
+            <PlaylistContainer>
+              <Playlist
+                sessionId={sessionId}
+                queue={session.queue}
+                updateQueueOffset={() => {}}
+              />
+            </PlaylistContainer>
             <PlayerContainer>
-              <Player queue={data.session.queue} />
+              <Player queue={session.queue} />
             </PlayerContainer>
           </SessionQueue>
           <div className="underlay" />

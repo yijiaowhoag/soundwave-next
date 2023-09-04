@@ -58,6 +58,8 @@ export type PlaylistTrack = Omit<TrackInQueue, 'artists'> & {
   artists: Array<Optional<Artist, 'genres' | 'images' | 'uri'>>;
 };
 
+export type PlaybackTrack = Omit<PreviewTrack, 'album'>;
+
 export enum RepeatMode {
   OFF = 'off',
   CONTEXT = 'context',

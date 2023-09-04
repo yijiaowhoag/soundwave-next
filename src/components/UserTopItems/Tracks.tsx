@@ -1,10 +1,9 @@
 import styled from 'styled-components';
 import { BsPlayFill } from 'react-icons/bs';
-import { useUserTopTracksQuery } from '../../__generated__/types';
 import { OutlineButton } from '../shared/Button';
-import TrackCard from './TrackCard';
+import TrackCard, { TrackCard as TrackCardType } from './TrackCard';
 
-const TopTracksDiv = styled.div`
+const TracksDiv = styled.div`
   ul {
     display: flex;
     align-items: center;
@@ -12,11 +11,12 @@ const TopTracksDiv = styled.div`
     margin: 0;
     padding: 0;
     overflow-x: scroll;
+    overflow-y: hidden;
     list-style: none;
   }
 `;
 
-const TopTracksHeader = styled.div`
+const TracksHeader = styled.div`
   display: flex;
   align-items: center;
   padding: 1.5rem 0;
@@ -42,55 +42,51 @@ const FetchMoreButton = styled(OutlineButton)`
   margin: 0 2.5rem;
 `;
 
-interface TopTracksProps {
+interface TracksProps {
+  heading: string;
+  tracks?: TrackCardType[];
+  onFetchMore?: () => void;
   handlePlayQueue: (uris: string[], offset: number) => void;
 }
 
-const TopTracks: React.FC<TopTracksProps> = ({ handlePlayQueue }) => {
-  const { data, loading, fetchMore } = useUserTopTracksQuery({
-    variables: { offset: 0, limit: 20 },
-  });
-
+const Tracks: React.FC<TracksProps> = ({
+  heading,
+  tracks,
+  onFetchMore,
+  handlePlayQueue,
+}) => {
   const play = () => {
-    if (!data?.userTopTracks) return;
+    if (!tracks) return;
 
-    const uris = data.userTopTracks.map((track) => track.uri);
+    const uris = tracks.map((track) => track.uri);
 
     handlePlayQueue(uris, 0);
   };
 
+  const noop = () => {};
   return (
-    <TopTracksDiv>
-      <TopTracksHeader>
-        <h2>Weekly Top Tracks</h2>
+    <TracksDiv>
+      <TracksHeader>
+        <h2>{heading}</h2>
         <PlayButton onClick={play}>
           Play
           <BsPlayFill className="play-icon" />
         </PlayButton>
-      </TopTracksHeader>
-      {loading && <p>Loading...</p>}
-      {data && (
+      </TracksHeader>
+      {tracks && (
         <ul>
-          {data.userTopTracks.map((track) => (
-            <li key={track.id}>
+          {tracks.map((track, idx) => (
+            <li key={`${track.id}-${idx}`}>
               <TrackCard track={track} />
             </li>
           ))}
-          <FetchMoreButton
-            onClick={() => {
-              fetchMore({
-                variables: {
-                  offset: data.userTopTracks.length,
-                },
-              });
-            }}
-          >
+          <FetchMoreButton onClick={onFetchMore ?? noop}>
             Load More
           </FetchMoreButton>
         </ul>
       )}
-    </TopTracksDiv>
+    </TracksDiv>
   );
 };
 
-export default TopTracks;
+export default Tracks;

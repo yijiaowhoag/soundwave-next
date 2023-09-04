@@ -50,8 +50,6 @@ const usePlayerControls = () => {
   const next = playbackState?.track_window.next_tracks[0];
   const isPaused = playbackState?.paused ?? true;
 
-  console.log('LAST PLAYED TRACK:', lastPlayedTrack);
-
   return {
     device,
     player,

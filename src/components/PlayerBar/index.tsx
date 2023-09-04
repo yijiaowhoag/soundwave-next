@@ -3,7 +3,7 @@ import usePlayerControls from '../../hooks/usePlayerControls';
 import Controls from '../Player/Controls';
 import ProgressBar from '../Player/ProgressBar';
 import VolumeControl from '../VolumeControl';
-import type { PreviewTrack } from '../../types';
+import type { PlaybackTrack } from '../../types';
 
 const Container = styled.div`
   position: fixed;
@@ -76,7 +76,7 @@ const TrackInfo = styled.div`
 `;
 
 interface PlayerProps {
-  lastPlayedTrack?: PreviewTrack;
+  lastPlayedTrack?: PlaybackTrack;
 }
 
 const PlayerBar: React.FC<PlayerProps> = ({ lastPlayedTrack }) => {

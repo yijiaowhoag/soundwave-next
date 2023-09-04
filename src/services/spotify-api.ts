@@ -1,6 +1,6 @@
 import { RESTDataSource, AugmentedRequest } from '@apollo/datasource-rest';
 import querystring from 'querystring';
-import type { JWT } from '../lib/jwt';
+import qs from 'qs';
 
 interface Paging<T> {
   items: T[];
@@ -32,6 +32,18 @@ export class SpotifyAPI extends RESTDataSource {
   async getUserTopArtists(offset: number, limit: number): Promise<Paging<any>> {
     return this.get(
       `${this.baseURL}/me/top/artists?limit=${limit}&offset=${offset}`
+    );
+  }
+
+  async getUserRecentlyPlayed(
+    before: number,
+    after?: number,
+    limit?: number
+  ): Promise<Paging<any>> {
+    return this.get(
+      `${this.baseURL}/me/player/recently-played?${qs.stringify(
+        before ? { before, limit } : { after, limit }
+      )}`
     );
   }
 
@@ -86,4 +98,8 @@ export class SpotifyAPI extends RESTDataSource {
       `${this.baseURL}/me/player/repeat?device_id=${deviceId}&state=${state}`
     );
   }
+}
+
+function filteredObj(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([k, v]) => v));
 }

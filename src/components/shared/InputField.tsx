@@ -1,9 +1,10 @@
+import { useRef, useCallback } from 'react';
 import styled, { css } from 'styled-components';
-import { useField } from 'formik';
+import { useField, FieldAttributes } from 'formik';
 
 const FieldGroup = styled.div`
   position: relative;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 `;
 
 const FieldLabel = styled.label`
@@ -11,7 +12,8 @@ const FieldLabel = styled.label`
   top: 0;
   left: 0;
   transform: translate(1rem, -50%);
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 13px;
   line-height: 18px;
   opacity: 0;
 
@@ -55,7 +57,7 @@ const TextInput = styled.input`
 `;
 
 const Textarea = styled.textarea`
-  height: 10rem;
+  height: 100%;
   resize: none;
   ${fieldStyles}
 `;
@@ -84,21 +86,44 @@ type InputFieldProps = React.InputHTMLAttributes<
   name: string;
   type?: string;
   textarea?: boolean;
+  autoFocus?: boolean;
+  innerRef?: React.MutableRefObject<HTMLInputElement | HTMLTextAreaElement>;
+  fieldGroupStyles?: React.CSSProperties;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
   textarea,
   label,
+  autoFocus = false,
+  innerRef,
+  fieldGroupStyles,
   ...props
 }) => {
   const [field, meta] = useField(props);
 
+  const fieldRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+  const focusField = useCallback(() => {
+    if (fieldRef.current) {
+      fieldRef.current.focus();
+    }
+  }, []);
+
   return (
-    <FieldGroup>
+    <FieldGroup style={fieldGroupStyles}>
       {textarea ? (
-        <Textarea {...field} {...props} />
+        <Textarea
+          ref={fieldRef as React.Ref<HTMLTextAreaElement>}
+          {...field}
+          {...props}
+        />
       ) : (
-        <TextInput autoComplete="off" {...field} {...props} />
+        <TextInput
+          ref={fieldRef as React.Ref<HTMLInputElement>}
+          autoComplete="off"
+          {...field}
+          {...props}
+        />
       )}
       <FieldLabel htmlFor={props.name}>{label}</FieldLabel>
       {meta.touched && meta.error && <FieldError>{meta.error}</FieldError>}

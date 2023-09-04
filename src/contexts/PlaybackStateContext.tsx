@@ -32,7 +32,6 @@ export const PlaybackStateProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [player]);
 
   const playerStateChanged = (state: Spotify.PlaybackState) => {
-    console.log('playerStateChanged', state);
     setPlaybackState(state);
     if (state?.track_window?.current_track) {
       setLastPlayedTrack(state.track_window.current_track);

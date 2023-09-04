@@ -33,23 +33,12 @@ const ArtistsDiv = styled.div`
 interface ArtistsProps {
   heading: string;
   artists?: Partial<SpotifyArtist[]>;
-  loading?: boolean;
-  error?: string;
 }
 
-const Artists: React.FC<ArtistsProps> = ({
-  heading,
-  artists,
-  loading = false,
-  error,
-}) => {
+const Artists: React.FC<ArtistsProps> = ({ heading, artists }) => {
   return (
     <ArtistsDiv>
       <h2>{heading}</h2>
-      <p>
-        {error && <strong>Error: {error}</strong>}
-        {loading && <span>Loading...</span>}
-      </p>
       {artists && (
         <ul>
           {artists.map((artist) => (

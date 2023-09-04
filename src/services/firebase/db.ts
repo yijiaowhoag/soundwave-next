@@ -1,12 +1,10 @@
-import { admin } from './init';
+import { FieldValue } from 'firebase-admin/firestore';
+import { firestore } from './init';
 import { User } from '../../apollo/entities/User';
 import { Session } from '../../apollo/entities/Session';
 import { TrackInQueue, AddTrackInput } from '../../apollo/entities/Track';
 import { SeedInput } from '../../apollo/resolvers/search';
 import type { SpotifyUser } from '../../types';
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 const converter = <T>() => ({
   toFirestore: (data: T): FirebaseFirestore.DocumentData => data,
@@ -83,7 +81,7 @@ const getSessionById = async (sessionId: string) => {
 const createSession = async (data) => {
   const sessionRef = await collectionDataPoint<Session>('sessions').add({
     ...data,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
   });
 
   return await docDataPoint<User>(
@@ -115,10 +113,10 @@ const removeTrackFromSession = async (sessionId: string, trackId: string) => {
 };
 
 const addRecentSearch = async (userId: string, search: SeedInput) => {
-  const timestamp = admin.firestore.FieldValue.serverTimestamp();
+  const timestamp = FieldValue.serverTimestamp();
 
   return await docDataPoint<User>(`users/${userId}`).update({
-    searches: admin.firestore.FieldValue.arrayUnion({
+    searches: FieldValue.arrayUnion({
       ...search,
       timestamp: new Date(Date.now()),
     }),
@@ -131,7 +129,7 @@ const removeRecentSearch = async (userId: string, searchId: string) => {
   const removed = searches.find((search) => search.id === searchId);
 
   return await userRef.update({
-    searches: admin.firestore.FieldValue.arrayRemove(removed),
+    searches: FieldValue.arrayRemove(removed),
   });
 };
 

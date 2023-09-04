@@ -40,7 +40,6 @@ const PreviewAudio = forwardRef<HTMLAudioElement, PreviewAudioProps>(
       };
 
       const setAudioTime = () => {
-        console.log('duration', duration, 'currentTime', currentTime);
         setCurrentTime(audio.currentTime);
       };
 

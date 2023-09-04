@@ -4,6 +4,8 @@ import type { User } from '../types';
 
 interface AuthSession {
   accessToken: string;
+  refreshToken: string;
+  exp: number;
   user: User;
 }
 

@@ -4,111 +4,64 @@ import {
   Mutation,
   Arg,
   Ctx,
-  InputType,
+  ObjectType,
   Field,
   Int,
-  Float,
   registerEnumType,
 } from 'type-graphql';
-import { Image } from '../entities/Image';
-import { Track } from '../entities/Track';
 import { Artist, ArtistDetails } from '../entities/Artist';
+import { Track } from '../entities/Track';
 import { RepeatMode, type Context } from '../../types';
 
 registerEnumType(RepeatMode, { name: 'RepeatMode' });
 
-@InputType()
-export class AudioFiltersInput {
-  @Field(() => Float, { nullable: true })
-  min_acousticness?: number;
+@ObjectType()
+export class UserTopItems {
+  @Field(() => [Track])
+  topTracks: Track[];
 
-  @Field(() => Float, { nullable: true })
-  max_acousticness?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_acousticness?: number;
-
-  @Field(() => Float, { nullable: true })
-  min_danceability?: number;
-
-  @Field(() => Float, { nullable: true })
-  max_danceability?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_danceability?: number;
-
-  @Field(() => Float, { nullable: true })
-  min_energy?: number;
-
-  @Field(() => Float, { nullable: true })
-  max_energy?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_energy?: number;
-
-  @Field(() => Float, { nullable: true })
-  min_liveness?: number;
-
-  @Field(() => Float, { nullable: true })
-  max_liveness?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_liveness?: number;
-
-  @Field(() => Float, { nullable: true })
-  min_tempo?: number;
-
-  @Field(() => Float, { nullable: true })
-  max_tempo?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_tempo?: number;
-
-  @Field(() => Float, { nullable: true })
-  min_valence?: number;
-
-  @Field(() => Float, { nullable: true })
-  max_valence?: number;
-
-  @Field(() => Float, { nullable: true })
-  target_valence?: number;
+  @Field(() => [Artist])
+  topArtists: Artist[];
 }
 
 @Resolver()
 export class SpotifyResolver {
-  @Query(() => [Track])
-  async userTopTracks(
+  @Query(() => UserTopItems)
+  async userTopItems(
     @Arg('offset', () => Int, { nullable: true }) offset: number,
+    @Arg('limit', () => Int, { nullable: true }) limit: number,
+    @Ctx() { dataSources }: Context
+  ): Promise<UserTopItems> {
+    const { items: topTracks } = await dataSources.spotifyAPI.getUserTopTracks(
+      offset,
+      limit
+    );
+    const { items: topArtists } =
+      await dataSources.spotifyAPI.getUserTopArtists(offset, limit);
+
+    return {
+      topTracks: topTracks.map(trackReducer),
+      topArtists: topArtists.map(artistReducer),
+    };
+  }
+
+  @Query(() => [Track])
+  async userRecentlyPlayed(
+    @Arg('before', () => Int, { nullable: true }) before: number,
+    @Arg('after', () => Int, { nullable: true }) after: number,
     @Arg('limit', () => Int, { nullable: true }) limit: number,
     @Ctx() { dataSources }: Context
   ): Promise<Track[]> {
-    const response = await dataSources.spotifyAPI.getUserTopTracks(
-      offset,
-      limit
-    );
-    const items = Array.isArray(response.items)
-      ? response.items.map(trackReducer)
-      : [];
-
-    return items;
-  }
-
-  @Query(() => [Artist])
-  async userTopArtists(
-    @Arg('offset', () => Int, { nullable: true }) offset: number,
-    @Arg('limit', () => Int, { nullable: true }) limit: number,
-    @Ctx() { dataSources }: Context
-  ): Promise<Artist[]> {
-    const response = await dataSources.spotifyAPI.getUserTopArtists(
-      offset,
+    const { items } = await dataSources.spotifyAPI.getUserRecentlyPlayed(
+      Date.now(),
+      after,
       limit
     );
 
-    const items = Array.isArray(response.items)
-      ? response.items.map(artistReducer)
-      : [];
-
-    return items;
+    return items.map((item) => ({
+      ...trackReducer(item.track),
+      played_at: item.played_at,
+    }));
   }
 
   @Query(() => ArtistDetails)
@@ -131,40 +84,6 @@ export class SpotifyResolver {
       topTracks: tracks.map(trackReducer),
       relatedArtists: artists.map(artistReducer),
     };
-  }
-
-  @Query(() => [Track])
-  async recommendations(
-    @Arg('seeds', () => [String!], { nullable: true }) seeds: string[] | null,
-    @Arg('filters', () => AudioFiltersInput, { nullable: true })
-    filters: AudioFiltersInput | null,
-    @Ctx() { dataSources }: Context
-  ): Promise<Track[]> {
-    if (!seeds) return [];
-
-    const response = await dataSources.spotifyAPI.getRecommendations(
-      seeds,
-      filters &&
-        Object.entries(filters).filter(([k, v], i) => filters[k] !== undefined)
-    );
-    const items = Array.isArray(response.tracks)
-      ? response.tracks.map(trackReducer)
-      : [];
-
-    return items;
-  }
-
-  @Query(() => [Track])
-  async search(
-    @Arg('query') query: string,
-    @Ctx() { dataSources }: Context
-  ): Promise<Track[]> {
-    const response = await dataSources.spotifyAPI.search(query);
-    const items = Array.isArray(response.tracks.items)
-      ? response.tracks.items.map(trackReducer)
-      : [];
-
-    return items;
   }
 
   @Mutation(() => Boolean)
@@ -206,7 +125,7 @@ export class SpotifyResolver {
   }
 }
 
-function artistReducer(artist) {
+export function artistReducer(artist): Artist {
   return {
     id: artist.id,
     name: artist.name,
@@ -216,7 +135,7 @@ function artistReducer(artist) {
   };
 }
 
-function trackReducer(track) {
+export function trackReducer(track): Track {
   return {
     id: track.id,
     name: track.name,
@@ -224,7 +143,7 @@ function trackReducer(track) {
       id: track.album.id,
       name: track.album.name,
       release_date: track.album.release_date,
-      images: track.album.images.map((image: Image) => ({
+      images: track.album.images.map((image) => ({
         width: image.width,
         height: image.height,
         url: image.url,
@@ -233,7 +152,7 @@ function trackReducer(track) {
     artists:
       track.artists && track.artists.length > 0
         ? track.artists.reduce(
-            (acc: Artist[], trackArtist: Artist) => [
+            (acc: Artist[], trackArtist) => [
               ...acc,
               artistReducer(trackArtist),
             ],

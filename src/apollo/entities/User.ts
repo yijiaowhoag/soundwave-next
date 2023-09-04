@@ -1,4 +1,10 @@
-import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
+import {
+  Field,
+  ID,
+  ObjectType,
+  InputType,
+  registerEnumType,
+} from 'type-graphql';
 import { Image } from './Image';
 import { Search } from '../resolvers/search';
 
@@ -7,7 +13,6 @@ enum Subscription {
   OPEN = 'open',
   PREMIUM = 'premium',
 }
-
 registerEnumType(Subscription, {
   name: 'Subscription',
   description: 'Spotify product subscription level',
@@ -35,4 +40,19 @@ export class User {
 
   @Field(() => [Search])
   searches: Search[];
+}
+
+@InputType()
+export class UserInput {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  avatar: string;
+
+  @Field(() => String)
+  display_name: string;
+
+  @Field(() => String)
+  email: string;
 }

@@ -14,8 +14,8 @@ import {
 } from 'type-graphql';
 import { Artist } from '../entities/Artist';
 import { Album, Track } from '../entities/Track';
-import { trackReducer } from '../../services/spotify-api';
-import { db } from '../../services/firestore';
+import { trackReducer } from './spotify';
+import { db } from '../../services/firebase/db';
 import type { Context } from '../../types';
 
 export enum SearchType {
@@ -145,7 +145,6 @@ export class SearchResolver {
     filters: AudioFiltersInput | null,
     @Ctx() { dataSources }: Context
   ): Promise<Track[]> {
-    console.log('recommendation seeds', seeds);
     if (!seeds) return [];
 
     const response = await dataSources.spotifyAPI.getRecommendations(
