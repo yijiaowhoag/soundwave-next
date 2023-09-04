@@ -12,7 +12,8 @@ const corsConfig = [
     maxAgeSeconds: 3600,
   },
 ];
-const bucket = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET);
+
+const bucket = storage.bucket();
 bucket
   .setCorsConfiguration(corsConfig)
   .then(() => {})
