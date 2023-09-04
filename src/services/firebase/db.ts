@@ -1,11 +1,12 @@
-import { FieldValue } from 'firebase-admin/firestore';
-import { firestore } from './init';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { app } from './init';
 import { User } from '../../apollo/entities/User';
 import { Session } from '../../apollo/entities/Session';
 import { TrackInQueue, AddTrackInput } from '../../apollo/entities/Track';
 import { SeedInput } from '../../apollo/resolvers/search';
 import type { SpotifyUser } from '../../types';
 
+const firestore = getFirestore(app);
 const converter = <T>() => ({
   toFirestore: (data: T): FirebaseFirestore.DocumentData => data,
   fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot): T =>
@@ -44,8 +45,9 @@ const getUser = async (userId: string) => {
 
 const createUser = async (data: SpotifyUser) => {
   const userRef = docDataPoint<User>(`users/${data.id}`);
+
   await userRef.set(
-    { ...data, avatar: data.images[0].url, searches: [] },
+    { ...data, avatar: data.images[0]?.url, searches: [] },
     { merge: true }
   );
 

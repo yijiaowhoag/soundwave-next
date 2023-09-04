@@ -43,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           email: user.email,
         },
       };
-      if (user.images.length) {
+      if (user.images?.length) {
         session['user']['avatar'] =
           user.images.find((image) => image.height === 300) ||
           user.images[0].url;
