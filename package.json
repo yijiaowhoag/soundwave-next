@@ -15,7 +15,7 @@
     "@apollo/client": "^3.4.9",
     "@apollo/datasource-rest": "^5.0.1",
     "@apollo/server": "^4.3.0",
-    "@as-integrations/next": "^1.2.0",
+    "@as-integrations/next": "^3.0.0",
     "@graphql-tools/schema": "^9.0.12",
     "@szhsin/react-menu": "^3.5.1",
     "cookie": "^0.4.1",

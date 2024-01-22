@@ -62,6 +62,6 @@ const apolloServer = new ApolloServer<ContextValue>({
   schema,
 });
 
-export default startServerAndCreateNextHandler<ContextValue>(apolloServer, {
+export default startServerAndCreateNextHandler(apolloServer, {
   context: createApolloContext,
 });
